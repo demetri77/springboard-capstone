@@ -11,15 +11,17 @@ At least 2 out of 5 Americans have a college degree. As U.S. Labor Department st
 2. Average return
     + MN_EARN_WNE_P10 vs MD_EARN_WNE_P10
 3. Whether degree makes a difference in job search
-    + Bureau of Labor Statistics, $400/week ($19k-21k/year) diff in earnings for degree holders
+    + Bureau of Labor Statistics, $400/week ($19k-21k/year) difference in earnings for degree holders
     + Unemployment rate for degree is 4.9% vs. 9.4% without
+    + [Bureau of Labor Statistics](https://www.bls.gov/ooh)
 4. Alternatives to degree
 
 > Data source from [College Score Card](https://collegescorecard.ed.gov/data/)
 
-### Don't be a menace to society
+### Don't be a Menace to Society
 
-With at least 323 million people, [the US represents 4.4% of the world's population but houses 22% of its prisoners](https://en.wikipedia.org/wiki/United_States_incarceration_rate). As such, the US also incarcerates more of its youth than any other country in the world in juvenile detention facilities. [In 2016, there were over 45,000 juveniles in detention facilities](https://en.wikipedia.org/wiki/Youth_detention_center#United_States). [There's an average of 36 violent crimes per 10,000 residents per state](https://www.santarosa-lawyer.com/united-states-crime-map-2017/). Is there a correlation between stress and crimes? (https://engaging-data.com/most-stressed-states)
+With at least 323 million people, [the US represents 4.4% of the world's population but houses 22% of its prisoners](https://en.wikipedia.org/wiki/United_States_incarceration_rate). As such, the US also incarcerates more of its youth than any other country in the world in juvenile detention facilities. [In 2016, there were over 45,000 juveniles in detention facilities](https://en.wikipedia.org/wiki/Youth_detention_center#United_States). [There's an average of 36 violent crimes per 10,000 residents per state](https://www.santarosa-lawyer.com/united-states-crime-map-2017/). The government can continue to dole out punishments for crimes but can the government better foster a society that is less pronse to committ crimes? Is there a correlation between stress and crimes? (https://engaging-data.com/most-stressed-states)
 
 > [U.S. Census](https://www.census.gov)
+
 > [Bureau of Prisons](https://www.bop.gov/about/statistics/)
