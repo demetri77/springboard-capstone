@@ -7,17 +7,17 @@ Ivy league school only educate 0.4% of undergraduates
 **Is a college degree worth it?**
 
 1. Cost of a degree
-  * COSTT4_A: Average cost of attendance
-  * RPY_1YR_RT: Fraction of repayment cohort with loan balances 1 year since repyament
-  * CUML_DEBT_P90: Cumulative loan debt at the 90th percentile
+    + COSTT4_A: Average cost of attendance
+    + RPY_1YR_RT: Fraction of repayment cohort with loan balances 1 year since repyament
+    + CUML_DEBT_P90: Cumulative loan debt at the 90th percentile
 2. Average return
-  * MN_EARN_WNE_P10 vs MD_EARN_WNE_P10
+    + MN_EARN_WNE_P10 vs MD_EARN_WNE_P10
 3. Whether degree makes a difference in job search
-  * Bureau of Labor Statistics, $400/week ($19k-21k/year) diff in earnings for degree holders
-  * Unemployment rate for degree is 4.9% vs. 9.4% without
+    + Bureau of Labor Statistics, $400/week ($19k-21k/year) diff in earnings for degree holders
+    + Unemployment rate for degree is 4.9% vs. 9.4% without
 4. Alternatives to degree
 
-* Data source from [College Score Card](www.collegescorecard.ed.gov/data)
+* Data source from [College Score Card](https://www.collegescorecard.ed.gov/data)
 
 ### Don't be a menace to society
 
