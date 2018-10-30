@@ -18,11 +18,11 @@ At least 2 out of 5 Americans have a college degree. U.S. Labor Department stati
 
 > Data source from [College Score Card](https://collegescorecard.ed.gov/data/)
 
-### How effective are US prisons?
+### Criminal Justice Reform
 
 With at least 323 million people, [the US represents 4.4% of the world's population but houses 22% of its prisoners](https://en.wikipedia.org/wiki/United_States_incarceration_rate). As such, the US also incarcerates more of its youth than any other country in the world in juvenile detention facilities. [In 2016, there were over 45,000 juveniles in detention facilities](https://en.wikipedia.org/wiki/Youth_detention_center#United_States). [There's an average of 36 violent crimes per 10,000 residents per state](https://www.santarosa-lawyer.com/united-states-crime-map-2017/). How much of our prisoners should remain in prison? What are the factors to preventing repeat offenders?
 
-**Criminal Justice Reform**
+**How effective are US prisons?**
 [Incarceration Report](http://time.com/4596081/incarceration-report/)
 
 + 2.3 million prisoners in the US.
