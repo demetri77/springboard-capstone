@@ -2,8 +2,6 @@
 
 At least 2 out of 5 Americans have a college degree. U.S. Labor Department statistics show that overall, college graduates today earn roughly 98% more per hour than people without a degree, it's no wonder Americans have been culturally taught to believe success in life requires a college degree. However, the average American is also in debt. The median student loan is [$17k](https://apps.urban.org/features/debt-interactive-map/) and more Americans owe student loans than car loans or a mortgage. Which colleges offer the best return, tuition/debt vs salary? Which factors from the College Score Card affect salary after attending?
 
-In 
-
 **Is a college degree worth it?**
 
 1. Cost of a degree
@@ -27,15 +25,15 @@ With at least 323 million people, [the US represents 4.4% of the world's populat
 **Criminal Justice Reform**
 [Incarceration Report](http://time.com/4596081/incarceration-report/)
 
-* 2.3 million prisoners in the US.
-* 25% serve sentences for non-violent crimes
-* It costs $31,000 a year to keep a person in prison
-* Should public safety be the main reason for incarceration?
++ 2.3 million prisoners in the US.
++ 25% serve sentences for non-violent crimes
++ It costs $31,000 a year to keep a person in prison
++ Should public safety be the main reason for incarceration?
     1. criminal severity
     2. victim impact
     3. intent
     4. recidivism -- repeat offense
-* Major Crimes
++ Major Crimes
     1. aggravated assault
     2. murder
     3. nonviolent weapons crimes
