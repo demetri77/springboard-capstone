@@ -6,7 +6,7 @@ At least 2 out of 5 Americans have a college degree. U.S. Labor Department stati
 1.  Which colleges offer the best return, tuition/debt vs salary? 
 2.  Which factors from the College Score Card affect salary after attending?
 3.  Is a college degree worth it? __advice: identify metrics that are objective__
-4.  Value = Price / Quality
+4.  What is Value? Is it simply where Price meets Quality? Price is set, can Quality be determined by Earnings?
 
 Variable Types of Interest
 * COST
@@ -26,8 +26,6 @@ Variable Types of Interest
     + Unemployment rate for degree is 4.9% versus 9.4% without
     + [Bureau of Labor Statistics](https://www.bls.gov/ooh)
 4. Alternatives to degree
-
-
 
 > Data source from [College Score Card](https://collegescorecard.ed.gov/data/)
 
