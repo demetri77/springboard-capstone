@@ -1,11 +1,22 @@
 ### College Score Card
 
-At least 2 out of 5 Americans have a college degree. U.S. Labor Department statistics show that overall, college graduates today earn roughly 98% more per hour than people without a degree, it's no wonder Americans have been culturally taught to believe success in life requires a college degree. However, the average American is also in debt. The median student loan is [$17k](https://apps.urban.org/features/debt-interactive-map/) and more Americans owe student loans than car loans or a mortgage. Which colleges offer the best return, tuition/debt vs salary? Which factors from the College Score Card affect salary after attending?
+At least 2 out of 5 Americans have a college degree. U.S. Labor Department statistics show that overall, college graduates today earn roughly 98% more per hour than people without a degree, it's no wonder Americans have been culturally taught to believe success in life requires a college degree. However, the average American is also in debt. The median student loan is [$17k](https://apps.urban.org/features/debt-interactive-map/) and more Americans owe student loans than car loans or a mortgage. 
 
-**Is a college degree worth it?**
+**Questions:**
+1.  Which colleges offer the best return, tuition/debt vs salary? 
+2.  Which factors from the College Score Card affect salary after attending?
+3.  Is a college degree worth it? __advice: identify metrics that are objective__
+4.  Value = Price / Quality
+
+Variable Types of Interest
+* COST
+* EARNINGS
+* REPAYMENT
 
 1. Cost of a degree
-    + COSTT4_A: Average cost of attendance
+    + COSTT4_A: Average cost of attendance per academic year
+    + NPT4_PUB: Average net price for Title IV institutions (public institutions)
+    + NPT4_PRIV: Average net price for Title IV institutions (private for-profit and nonprofit institutions)
     + RPY_1YR_RT: Fraction of repayment cohort with loan balances 1 year since repyament
     + CUML_DEBT_P90: Cumulative loan debt at the 90th percentile
 2. Mean earnings vs Median earnings
@@ -16,7 +27,11 @@ At least 2 out of 5 Americans have a college degree. U.S. Labor Department stati
     + [Bureau of Labor Statistics](https://www.bls.gov/ooh)
 4. Alternatives to degree
 
+
+
 > Data source from [College Score Card](https://collegescorecard.ed.gov/data/)
+
+
 
 ### Criminal Justice Reform
 
@@ -32,7 +47,7 @@ With at least 323 million people, [the US represents 4.4% of the world's populat
     1. criminal severity
     2. victim impact
     3. intent
-    4. recidivism -- repeat offense
+    4. recidivism: tendency to reoffend
 + Major Crimes
     1. aggravated assault
     2. murder
@@ -41,9 +56,12 @@ With at least 323 million people, [the US represents 4.4% of the world's populat
     5. serious burglary
     6. serious drug trafficking
 
-> [Bureau of Justice](https://bjs.gov/)
+> [Bureau of Justice](https://www.bjs.gov/index.cfm?ty=tp&tid=17)
 
 > [Bureau of Prisons](https://www.bop.gov/about/statistics/)
 
+### Third Capstone Idea
 
 
+##Project proposal
+##Exploration
