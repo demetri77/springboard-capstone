@@ -16,5 +16,14 @@
 * Which group (race/gender/age/weight) has certain diagnoses?
 * Which anti-diabetic medicine has highest success rate?
 
+## Bank Marketing
+45,211 instances with 20 attributes; Classification
+[Bank Marketing](https://archive.ics.uci.edu/ml/datasets/Bank+Marketing)
+
+* Will the client subscribe to a term deposit? __Logistic Regression__
+* What are the client attributes?
+* What factors will contribute to subscribing to term deposit?
+
+
 ## How does poverty/income affects children's health/education?
 
