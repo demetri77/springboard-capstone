@@ -16,13 +16,12 @@ summary(bank)
 summary(bank_add)
 
 
-d2017 <- read_csv("MERGED2016_17_PP.csv", na = c("", "NA", "NULL"))
+#d2017 <- read_csv("MERGED2016_17_PP.csv", na = c("", "NA", "NULL"))
 #d2016a <- read_csv("MERGED2015_16_PP.csv")
 #d2016b <- read_csv("MERGED2015_16_PP.csv", na = c("", "NA", "NULL"))
 
 ## Variable selection
 # dsub2017 <- d2017 %>% select(INSTNM, CITY, STABBR, NPT4_PUB, NPT4_PRIV, COSTT4_A, UNEMP_RATE, MD_EARN_WNE_P10, MN_EARN_WNE_P10)
-summary(dsub2017)
 
 #rename(dsub2017$STABBR, dsub2017$STATE)
 
