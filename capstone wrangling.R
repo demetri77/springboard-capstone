@@ -1,38 +1,51 @@
 library(tidyverse)
 
-## Read in 
-bank <- read_delim("bank/bank-full.csv", ";")
-bank_add <- read_delim("bank-additional/bank-additional-full.csv", ";")
+## Read in file
+bankfull <- read_delim(file = "bank-additional-full.csv", delim = ";")
 
-colnames(bank)
-colnames(bank_add)
+#str(bankfull)
+glimpse(bankfull)
+#colnames(bankfull)[colnames(bankfull) == "y"] <- "subscribed"
+#colnames(bankfull)[colnames(bankfull) == "nr.employed"] <- "num.employed"
+#select(bankfull, y = subscribed)
+bankfull <- rename(bankfull, CPI = "cons.price.idx")
+bankfull <- rename(bankfull, CCI = "cons.conf.idx")
+bankfull <- rename(bankfull, subscribed = y)
 
-ggplot(bank, aes(x = y)) + geom_bar()
-ggplot(bank_add, aes(x = y)) + geom_bar()
+summary(bankfull)
+colnames(bankfull)
 
-dsub2011 <- d2011raw %>% select(INSTNM, CITY, STABBR, NPT4_PUB, NPT4_PRIV, COSTT4_A, UNEMP_RATE, MD_EARN_WNE_P6, MD_EARN_WNE_P10, MN_EARN_WNE_P10)
-filter(dsub2011, COSTT4_A != "NA")
-summary(bank)
-summary(bank_add)
+tally(bankfull, subscribed == "no")
+tally(bankfull, subscribed == "yes")
 
+ggplot(bankfull, aes(x = subscribed)) + geom_bar()
 
-#d2017 <- read_csv("MERGED2016_17_PP.csv", na = c("", "NA", "NULL"))
-#d2016a <- read_csv("MERGED2015_16_PP.csv")
-#d2016b <- read_csv("MERGED2015_16_PP.csv", na = c("", "NA", "NULL"))
+bankfull %>% select(education, job) %>% group_by(education, job) %>% arrange(desc(education)) %>% slice(1:3)
+bankfull %>% group_by(education) %>% summarise(count = n()) %>% arrange(desc(count))
+bankfull %>% group_by(job) %>% summarise(count = n()) %>% arrange(desc(count))
+
+ggplot(bankfull, aes(x = euribor3m, y = CPI)) + geom_point()
+
+## filter, select, arrange, mutate, summarise, group_by
 
 ## Variable selection
-# dsub2017 <- d2017 %>% select(INSTNM, CITY, STABBR, NPT4_PUB, NPT4_PRIV, COSTT4_A, UNEMP_RATE, MD_EARN_WNE_P10, MN_EARN_WNE_P10)
 
-#rename(dsub2017$STABBR, dsub2017$STATE)
+ggplot(bankfull, aes(x = job, fill=marital)) + geom_histogram(stat="count")
 
-ggplot(bank, aes(x = job, color=marital)) + geom_histogram(stat="count")
-ggplot(bank_add, aes(x=nr.employed)) + geom_bar()
+# Outcome of previous campaign
+ggplot(bankfull, aes(x = poutcome)) + geom_bar()
 
-median <- median(bank$balance)
-#average <- mean(bank$balance)
+medCPI <- median(bankfull$CPI)
+avgCPI <- mean(bankfull$CPI)
 
-#filter(bank, STABBR == "AK")
-ggplot(bank, aes(x = marital, y = balance)) + geom_point()
-ggplot(bank, aes(x = marital)) + geom_bar()
 
-# write_csv(dsub2017, path="~/springboard-capstone/dsub2017.csv")
+
+ggplot(bankfull, aes(x = marital, y = balance)) + geom_point()
+ggplot(bankfull, aes(x = marital)) + geom_bar()
+
+bankfull %>% print(n = 10)
+
+# summarytools
+
+# Write/Export dataset
+write_csv(bank, path="~/springboard-capstone/bank_new.csv")
