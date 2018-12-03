@@ -1,32 +1,57 @@
 ---
-title: "Capstone Wrangled"
+title: "Banking Capstone Wrangled"
 author: "Demetri Lee"
-date: "October 30, 2018"
+date: "December 1, 2018"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
+library(tidyverse)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Trying to predict the success of bank telemarketing
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+I'm trying to predict the success of telemarketing calls for a bank that's selling long-term deposits. A Portuguese retail bank was addressed, with data collected from 2008 to 2013, thus including the effects of the recent financial crisis of 2008. With 21 features available for analysis, I hope to derive knowledge for a model that would confirm how to better focus resources towards clients with a high chance of agreeing to registering for extra banking services. 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+### Read in the dataset with values delimited by semi-colons along with designated column types.
+```{r}
+bankfull <- read_delim(file = "bank-additional-full.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
 
-```{data2016 <- read_csv("MERGED2016_17_PP.csv")}
-library(dplyr)
-dsub2016 <- d2016 %>% select(INSTNM, CITY, STABBR, NPT4_PUB, NPT4_PRIV, COSTT4_A, UNEMP_RATE, MD_EARN_WNE_P10, MN_EARN_WNE_P10)
-summary(data2016)
+```
+Take a glimpse at the dataset
+```{r}
+glimpse(bankfull)
+```
+Rename variables to be more descriptive and avoid use of periods (".")
+```{r}
+bankfull <- rename(bankfull, contact_cnt = "campaign")
+bankfull <- rename(bankfull, days_passed = "pdays")
+bankfull <- rename(bankfull, prev_contact_cnt = "previous")
+bankfull <- rename(bankfull, prev_outcome = "poutcome")
+bankfull <- rename(bankfull, emp_var_rate = "emp.var.rate")
+bankfull <- rename(bankfull, cons_price_idx = "cons.price.idx")
+bankfull <- rename(bankfull, cons_conf_idx = "cons.conf.idx")
+bankfull <- rename(bankfull, num_employed = "nr.employed")
+bankfull <- rename(bankfull, subscribed = y)
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
-
-#```{r pressure, echo=FALSE}
-#plot(pressure)
+### Including Plots
+How did a previous campaign perform?
+```{r fig.cap = "failure = 4,252 vs success = 1,373 while remaining 35,563 were non-existent"}
+ggplot(bankfull, aes(x = prev_outcome)) + geom_bar()
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+How many of the same customers subscribed to a long-term deposit service versus those who have not?
+
+```{r echo=TRUE, fig.cap = "36,548 customers declined the extra service while 4,640 customers agreed"}
+tally(bankfull, subscribed == "no")
+tally(bankfull, subscribed == "yes")
+ggplot(bankfull, aes(x = subscribed)) + geom_bar()
+
+```
+
+
+
