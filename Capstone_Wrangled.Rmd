@@ -12,19 +12,27 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Trying to predict the success of bank telemarketing
 
-I'm trying to predict the success of telemarketing calls for a bank that's selling long-term deposits. A Portuguese retail bank was addressed, with data collected from 2008 to 2013, thus including the effects of the recent financial crisis of 2008. With 21 features available for analysis, I hope to derive knowledge for a model that would confirm how to better focus resources towards clients with a high chance of agreeing to registering for extra banking services. 
+I'm trying to predict the success of telemarketing calls for a bank that's  
+selling long-term deposits. A Portuguese retail bank was addressed, with data  
+collected from 2008 to 2013, thus including the effects of the recent  
+financial crisis of 2008. With 21 features available for analysis, I hope to  
+derive knowledge for a model that would confirm how to better focus resources  
+towards clients with a high chance of agreeing to registering for extra  
+banking services. 
 
-### Read in the dataset with values delimited by semi-colons along with designated column types.
+**Read in the dataset with values delimited by semi-colons along with  
+designated column types.**
+
 ```{r}
 bankfull <- read_delim(file = "bank-additional-full.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
 
 ```
-Take a glimpse at the dataset
-```{r}
-glimpse(bankfull)
-```
+
 Rename variables to be more descriptive and avoid use of periods (".")
+
 ```{r}
+bankfull <- rename(bankfull, edu_lvl = "education")
+bankfull <- rename(bankfull, contact_typ = "contact")
 bankfull <- rename(bankfull, contact_cnt = "campaign")
 bankfull <- rename(bankfull, days_passed = "pdays")
 bankfull <- rename(bankfull, prev_contact_cnt = "previous")
@@ -33,25 +41,43 @@ bankfull <- rename(bankfull, emp_var_rate = "emp.var.rate")
 bankfull <- rename(bankfull, cons_price_idx = "cons.price.idx")
 bankfull <- rename(bankfull, cons_conf_idx = "cons.conf.idx")
 bankfull <- rename(bankfull, num_employed = "nr.employed")
+```
+
+The goal is to determine what factors lead to a subscription so I'll rename  
+the dependent variable to something more descriptive than simply, 'y'.
+```{r}
 bankfull <- rename(bankfull, subscribed = y)
 ```
 
 
-### Including Plots
-How did a previous campaign perform?
-```{r fig.cap = "failure = 4,252 vs success = 1,373 while remaining 35,563 were non-existent"}
-ggplot(bankfull, aes(x = prev_outcome)) + geom_bar()
+Replace all periods ('.') with underscores ('_') for legibility
+
+```{r}
+etemp <- bankfull$edu_lvl
+bankfull$edu_lvl <- gsub("\\.", "_", etemp)
 ```
 
+Take a glimpse at the dataset
+
+```{r}
+glimpse(bankfull)
+```
+
+**Including Plots**
 
 How many of the same customers subscribed to a long-term deposit service versus those who have not?
 
-```{r echo=TRUE, fig.cap = "36,548 customers declined the extra service while 4,640 customers agreed"}
-tally(bankfull, subscribed == "no")
-tally(bankfull, subscribed == "yes")
+```{r echo=TRUE, fig.cap = "Only 11.3% of customers subscribed while an overwhelming 88.7% customers declined"}
+reject_cnt <- tally(bankfull, subscribed == "no")
+accept_cnt <- tally(bankfull, subscribed == "yes")
 ggplot(bankfull, aes(x = subscribed)) + geom_bar()
 
 ```
 
+How did a previous campaign perform?
+
+```{r fig.cap = "failure = 10.3% vs success = 3.3% while remaining 35,563 were non-existent"}
+ggplot(bankfull, aes(x = prev_outcome)) + geom_bar()
+```
 
 
