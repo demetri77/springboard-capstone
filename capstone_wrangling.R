@@ -18,26 +18,24 @@ bankfull <- rename(bankfull, cons_conf_idx = "cons.conf.idx")
 bankfull <- rename(bankfull, num_employed = "nr.employed")
 bankfull <- rename(bankfull, subscribed = y)
 
-
 etemp <- bankfull$edu_lvl
 bankfull$edu_lvl <- gsub("\\.", "_", etemp)
+
+is.factor(bankfull$subscribed)
+bankfull$subscribed <- as.factor(bankfull$subscribed)
 
 glimpse(bankfull)
 
 summary(bankfull)
 colnames(bankfull)
 
-tally(bankfull, subscribed == "no")
-tally(bankfull, subscribed == "yes")
+tally(bankfull, subscribed == "0")
+tally(bankfull, subscribed == "1")
 ggplot(bankfull, aes(x = subscribed)) + geom_bar()
 ggplot(bankfull, aes(x = pre_outcome)) + geom_bar()
 
 
-bankfull %>% 
-  select(edu_lvl, job) %>% 
-  group_by(edu_lvl, job) %>% 
-  arrange(desc(edu_lvl)) %>% 
-  slice(1:3)
+#bankfull %>% select(edu_lvl, job) %>% group_by(edu_lvl, job) %>% arrange(desc(edu_lvl)) %>% slice(1:3)
 
 bankfull %>% group_by(edu_lvl) %>% summarise(count = n()) %>% arrange(desc(count))
 bankfull %>% group_by(job) %>% summarise(count = n()) %>% arrange(desc(count))
@@ -57,16 +55,34 @@ ggplot(bankfull, aes(x = job, fill=subscribed)) + geom_histogram(stat="count")
 
 ggplot(bankfull, aes(x=euribor3m, fill=subscribed)) + geom_bar(stat="count")
 
+weekdays <- c("Mon", "Tue", "Wed", "Thu", "Fri")
+dailyTally <- tally(bankfull, day_of_week == "mon")
+dailyTally[1] <- tally(bankfull, day_of_week == "tue")
+dailyTally[2] <- tally(bankfull, day_of_week == "wed")
+dailyTally[3] <- tally(bankfull, day_of_week == "thu")
+dailyTally[4] <- tally(bankfull, day_of_week == "fri")
+tibble(weekdays, dailyTally)
+
+ggplot(bankfull, aes(x=days_of_week)) + geom_bar()
+
 # Outcome of previous campaign
 ggplot(bankfull, aes(x = poutcome)) + geom_bar()
 
-medCPI <- median(bankfull$CPI)
-avgCPI <- mean(bankfull$CPI)
+medCPI <- median(bankfull$cons_price_idx)
+avgCPI <- mean(bankfull$cons_price_idx)
 
 ggplot(bankfull, aes(x = marital, y = balance)) + geom_point()
 ggplot(bankfull, aes(x = marital)) + geom_bar()
 
-bankfull %>% print(n = 10)
+model <- glm(subscribed ~ ., data = bankfull, family = binomial)
+summary(model)
+
+#bankfull %>% print(n = 10)
+
+#reject_cnt <- tally(bankfull, subscribed == "no")
+#accept_cnt <- tally(bankfull, subscribed == "yes")
+#drows <- nrows()
+#print("Only ", accept_cnt/nrows(bankfull), "%")
 
 # summarytools
 

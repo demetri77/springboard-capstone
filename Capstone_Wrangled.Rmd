@@ -12,20 +12,19 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Trying to predict the success of bank telemarketing
 
-I'm trying to predict the success of telemarketing calls for a bank that's  
-selling long-term deposits. A Portuguese retail bank was addressed, with data  
-collected from 2008 to 2013, thus including the effects of the recent  
-financial crisis of 2008. With 21 features available for analysis, I hope to  
-derive knowledge for a model that would confirm how to better focus resources  
-towards clients with a high chance of agreeing to registering for extra  
+I'm trying to predict the success of telemarketing calls for a bank that's 
+selling long-term deposits. A Portuguese retail bank was addressed, with data 
+collected from 2008 to 2013, thus including the effects of the recent 
+financial crisis of 2008. With 21 features available for analysis, I hope to 
+derive knowledge for a model that would confirm how to better focus resources 
+towards clients with a high chance of agreeing to registering for extra 
 banking services. 
 
-**Read in the dataset with values delimited by semi-colons along with  
+**Read in the dataset with values delimited by semi-colons along with 
 designated column types.**
 
 ```{r}
-bankfull <- read_delim(file = "bank-additional-full.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
-
+bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
 ```
 
 Rename variables to be more descriptive and avoid use of periods (".")
@@ -43,7 +42,7 @@ bankfull <- rename(bankfull, cons_conf_idx = "cons.conf.idx")
 bankfull <- rename(bankfull, num_employed = "nr.employed")
 ```
 
-The goal is to determine what factors lead to a subscription so I'll rename  
+The goal is to determine what factors lead to a subscription so I'll rename 
 the dependent variable to something more descriptive than simply, 'y'.
 ```{r}
 bankfull <- rename(bankfull, subscribed = y)
@@ -63,7 +62,16 @@ Take a glimpse at the dataset
 glimpse(bankfull)
 ```
 
-**Including Plots**
+### Including Plots
+
+```{r}
+ggplot(bankfull, aes(x=age)) + geom_histogram(binwidth = 5)
+```
+```{r}
+count(bankfull, vars = day_of_week)
+ggplot(bankfull, aes(x=day_of_week)) + geom_bar()
+```
+
 
 How many of the same customers subscribed to a long-term deposit service versus those who have not?
 
@@ -72,7 +80,12 @@ reject_cnt <- tally(bankfull, subscribed == "no")
 accept_cnt <- tally(bankfull, subscribed == "yes")
 ggplot(bankfull, aes(x = subscribed)) + geom_bar()
 
+#print("Only ", accept_cnt/nrows(bankfull), "%")
+
 ```
+test = `r reject_cnt + 20`
+
+
 
 How did a previous campaign perform?
 
