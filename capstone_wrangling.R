@@ -2,8 +2,8 @@ library(tidyverse)
 
 ## Read in file
 #bankfull <- read.table("bank-additional-full.csv",header=TRUE,sep=";")
-#bankfull <- read_delim(file = "bank-additional-full.csv", delim = ";", col_types = cols(.default = "c"))
-bankfull <- read_delim("bank-additional-full.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
+#bankfull <- read_delim("bank-additional-full.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
+bankfull <- read_delim("bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
 
 #str(bankfull)
 bankfull <- rename(bankfull, edu_lvl = "education")
@@ -34,6 +34,7 @@ tally(bankfull, subscribed == "1")
 ggplot(bankfull, aes(x = subscribed)) + geom_bar()
 ggplot(bankfull, aes(x = pre_outcome)) + geom_bar()
 
+pie(table(bankfull$marital))
 
 #bankfull %>% select(edu_lvl, job) %>% group_by(edu_lvl, job) %>% arrange(desc(edu_lvl)) %>% slice(1:3)
 
@@ -41,7 +42,9 @@ bankfull %>% group_by(edu_lvl) %>% summarise(count = n()) %>% arrange(desc(count
 bankfull %>% group_by(job) %>% summarise(count = n()) %>% arrange(desc(count))
 
 ggplot(bankfull, aes(x = euribor3m, y = cons.price.idx)) + geom_point()
-ggplot(bankfull, aes(y = euribor3m, x = subscribed)) + geom_point()
+ggplot(bankfull, aes(y = euribor3m, x = subscribed)) + geom_point
+
+ggplot(data=bankfull, aes(x=edu_lvl, fill=subscribed)) + geom_bar()
 
 ## filter, select, arrange, mutate, summarise, group_by
 
@@ -56,12 +59,17 @@ ggplot(bankfull, aes(x = job, fill=subscribed)) + geom_histogram(stat="count")
 ggplot(bankfull, aes(x=euribor3m, fill=subscribed)) + geom_bar(stat="count")
 
 weekdays <- c("Mon", "Tue", "Wed", "Thu", "Fri")
+#Mon=0, Tue=1, ...
+group_by(group_by())
+
 dailyTally <- tally(bankfull, day_of_week == "mon")
 dailyTally[1] <- tally(bankfull, day_of_week == "tue")
 dailyTally[2] <- tally(bankfull, day_of_week == "wed")
 dailyTally[3] <- tally(bankfull, day_of_week == "thu")
 dailyTally[4] <- tally(bankfull, day_of_week == "fri")
 tibble(weekdays, dailyTally)
+
+groupby
 
 ggplot(bankfull, aes(x=days_of_week)) + geom_bar()
 
@@ -74,8 +82,24 @@ avgCPI <- mean(bankfull$cons_price_idx)
 ggplot(bankfull, aes(x = marital, y = balance)) + geom_point()
 ggplot(bankfull, aes(x = marital)) + geom_bar()
 
+subY <- filter(bankfull, subscribed = "yes")
+ggplot(subY, aes(x = duration, )) + geom_bar()
+
+
+ggplot(bankfull, aes(x=duration, y=subscribed)) + geom_point()
+
+#+ facet_grid()
+
+ggplot(bankfull, aes(x = contact_typ, fill = subscribed)) + geom_bar()
+
+edu_tmp <- as.factor(bankfull$edu_lvl)
+plot(edu_tmp)
+ggplot(edu_tmp, aes(x = edu_lvl)) + geom_bar()
+
+
 model <- glm(subscribed ~ ., data = bankfull, family = binomial)
 summary(model)
+
 
 #bankfull %>% print(n = 10)
 

@@ -56,6 +56,14 @@ etemp <- bankfull$edu_lvl
 bankfull$edu_lvl <- gsub("\\.", "_", etemp)
 ```
 
+There are only 2 possible values for the dependent variable, "subscribed". As
+such I'll convert the variable to type factor.
+
+```{r}
+is.factor(bankfull$subscribed)
+bankfull$subscribed <- as.factor(bankfull$subscribed)
+```
+
 Take a glimpse at the dataset
 
 ```{r}
@@ -64,12 +72,39 @@ glimpse(bankfull)
 
 ### Including Plots
 
+The value __duration__ refers to the length of time the customer was last 
+contacted, in seconds. Important note:  this attribute highly affects the 
+output target (e.g., if duration=0 then subscribed="no"). Yet, the duration 
+is not known before a call is performed. Also, after the end of the call 
+__subscribed__ is obviously known. Thus, this input should only be included 
+for benchmark purposes and should be discarded if the intention is to have a 
+realistic predictive model.
+
 ```{r}
-ggplot(bankfull, aes(x=age)) + geom_histogram(binwidth = 5)
+summary(bankfull$duration)
+boxplot(bankfull$duration)
+#ggplot(bankfull, aes(x=duration)) + geom_bar()
 ```
+
+
 ```{r}
-count(bankfull, vars = day_of_week)
-ggplot(bankfull, aes(x=day_of_week)) + geom_bar()
+ggplot(bankfull, aes(x=age)) + geom_histogram(binwidth = 1)
+```
+Pie chart of Customers' Marital Status
+
+```{r}
+table(bankfull$marital)
+pie(table(bankfull$marital))
+```
+
+
+
+```{r}
+#count(bankfull, vars = day_of_week)
+ggplot(bankfull, aes(x=subscribed, fill = contact_typ)) + geom_bar()
+ggplot(bankfull, aes(x = contact_typ, fill = subscribed)) + geom_bar()
+count(bankfull)
+
 ```
 
 
@@ -77,10 +112,13 @@ How many of the same customers subscribed to a long-term deposit service versus 
 
 ```{r echo=TRUE, fig.cap = "Only 11.3% of customers subscribed while an overwhelming 88.7% customers declined"}
 reject_cnt <- tally(bankfull, subscribed == "no")
+reject_pct <- reject_cnt/nrow(bankfull)*100
 accept_cnt <- tally(bankfull, subscribed == "yes")
+accept_pct <- accept_cnt/nrow(bankfull)*100
 ggplot(bankfull, aes(x = subscribed)) + geom_bar()
 
-#print("Only ", accept_cnt/nrows(bankfull), "%")
+print(accept_pct)
+print(reject_pct, "% would reject.")
 
 ```
 test = `r reject_cnt + 20`
