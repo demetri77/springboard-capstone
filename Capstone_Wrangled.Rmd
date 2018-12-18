@@ -31,6 +31,7 @@ Rename variables to be more descriptive and avoid use of periods (".")
 
 ```{r}
 bankfull <- rename(bankfull, edu_lvl = "education")
+bankfull <- rename(bankfull, duration_sec = "duration")
 bankfull <- rename(bankfull, contact_typ = "contact")
 bankfull <- rename(bankfull, contact_cnt = "campaign")
 bankfull <- rename(bankfull, days_passed = "pdays")
@@ -60,8 +61,10 @@ There are only 2 possible values for the dependent variable, "subscribed". As
 such I'll convert the variable to type factor.
 
 ```{r}
-is.factor(bankfull$subscribed)
+#is.factor(bankfull$subscribed)
 bankfull$subscribed <- as.factor(bankfull$subscribed)
+
+bankfull$prev_outcome <- as.factor(bankfull$prev_outcome)
 ```
 
 Take a glimpse at the dataset
@@ -72,6 +75,21 @@ glimpse(bankfull)
 
 ### Including Plots
 
+```{r}
+summary(bankfull$subscribed)
+plot(bankfull$subscribed)
+```
+
+How many clients from the previous campaign also signed up for a term deposit 
+this time around? Similar to looking for a repeat customer.
+
+```{r}
+xtabs(~prev_outcome+subscribed, bankfull)
+plot(xtabs(~prev_outcome+subscribed, bankfull), 
+     main="Previous Campaign Outcome vs Current Subscrption")
+```
+
+
 The value __duration__ refers to the length of time the customer was last 
 contacted, in seconds. Important note:  this attribute highly affects the 
 output target (e.g., if duration=0 then subscribed="no"). Yet, the duration 
@@ -81,13 +99,16 @@ for benchmark purposes and should be discarded if the intention is to have a
 realistic predictive model.
 
 ```{r}
-summary(bankfull$duration)
-boxplot(bankfull$duration)
+bankfull %>% mutate(duration_min = duration_sec/60)
+summary(bankfull$duration_min)
+boxplot(bankfull$duration_min)
 #ggplot(bankfull, aes(x=duration)) + geom_bar()
 ```
 
 
 ```{r}
+plot(density(bankfull$age), main="Density of Customer Age")
+ggplot(bankfull, aes(x=age)) + geom_bar()
 ggplot(bankfull, aes(x=age)) + geom_histogram(binwidth = 1)
 ```
 Pie chart of Customers' Marital Status
@@ -95,16 +116,24 @@ Pie chart of Customers' Marital Status
 ```{r}
 table(bankfull$marital)
 pie(table(bankfull$marital))
+
 ```
 
 
 
-```{r}
+```{r fig.cap = "Contact Type vs Subscribed"}
 #count(bankfull, vars = day_of_week)
 ggplot(bankfull, aes(x=subscribed, fill = contact_typ)) + geom_bar()
-ggplot(bankfull, aes(x = contact_typ, fill = subscribed)) + geom_bar()
+ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + geom_bar()
 count(bankfull)
 
+```
+
+Outcome of previous campaign
+
+```{r}
+ggplot(bankfull, aes(x = prev_outcome)) + geom_bar()
+summary(bankfull$prev_outcome)
 ```
 
 
@@ -115,6 +144,7 @@ reject_cnt <- tally(bankfull, subscribed == "no")
 reject_pct <- reject_cnt/nrow(bankfull)*100
 accept_cnt <- tally(bankfull, subscribed == "yes")
 accept_pct <- accept_cnt/nrow(bankfull)*100
+summary(bankfull$subscribed)
 ggplot(bankfull, aes(x = subscribed)) + geom_bar()
 
 print(accept_pct)
