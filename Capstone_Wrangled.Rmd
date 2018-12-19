@@ -99,7 +99,7 @@ for benchmark purposes and should be discarded if the intention is to have a
 realistic predictive model.
 
 ```{r}
-bankfull %>% mutate(duration_min = duration_sec/60)
+bankfull <- bankfull %>% mutate(duration_min = duration_sec/60)
 summary(bankfull$duration_min)
 boxplot(bankfull$duration_min)
 #ggplot(bankfull, aes(x=duration)) + geom_bar()
@@ -114,8 +114,8 @@ ggplot(bankfull, aes(x=age)) + geom_histogram(binwidth = 1)
 Pie chart of Customers' Marital Status
 
 ```{r}
-table(bankfull$marital)
-pie(table(bankfull$marital))
+#table(bankfull$marital)
+#pie(table(bankfull$marital))
 
 ```
 
@@ -123,8 +123,9 @@ pie(table(bankfull$marital))
 
 ```{r fig.cap = "Contact Type vs Subscribed"}
 #count(bankfull, vars = day_of_week)
-ggplot(bankfull, aes(x=subscribed, fill = contact_typ)) + geom_bar()
+#ggplot(bankfull, aes(x=subscribed, fill = contact_typ)) + geom_bar()
 ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + geom_bar()
+#try geom_col()
 count(bankfull)
 
 ```
@@ -148,7 +149,7 @@ summary(bankfull$subscribed)
 ggplot(bankfull, aes(x = subscribed)) + geom_bar()
 
 print(accept_pct)
-print(reject_pct, "% would reject.")
+#print(reject_pct, "% would reject.")
 
 ```
 test = `r reject_cnt + 20`

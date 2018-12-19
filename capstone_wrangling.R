@@ -1,5 +1,6 @@
 library(tidyverse)
 
+
 ## Read in file
 #bankfull <- read.table("bank-additional-full.csv",header=TRUE,sep=";")
 #bankfull <- read_delim("bank-additional-full.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
@@ -98,7 +99,8 @@ ggplot(subY, aes(x = duration, )) + geom_bar()
 
 ggplot(bankfull, aes(x=duration, y=subscribed)) + geom_point()
 
-#+ facet_grid()
+
+ggplot(bankfull, aes()) + facet_grid()
 
 ggplot(bankfull, aes(x = contact_typ, fill = subscribed)) + geom_bar()
 
