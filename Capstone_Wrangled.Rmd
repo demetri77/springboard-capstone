@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(ggplot2)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -75,9 +76,11 @@ glimpse(bankfull)
 
 ### Including Plots
 
+A cursory look at the subscribed variable will show most customers do not sign 
+up for the extra service.
 ```{r}
-summary(bankfull$subscribed)
-plot(bankfull$subscribed)
+prop.table(table(bankfull$subscribed))
+ggplot(bankfull, aes(x = subscribed)) + geom_bar() + labs(title = "How many clients subscribed?")
 ```
 
 How many clients from the previous campaign also signed up for a term deposit 
@@ -85,9 +88,40 @@ this time around? Similar to looking for a repeat customer.
 
 ```{r}
 xtabs(~prev_outcome+subscribed, bankfull)
+ggplot(bankfull, aes(prev_outcome)) + geom_bar() + labs(title = "How many clients subscribed to a previous campaign?")
 plot(xtabs(~prev_outcome+subscribed, bankfull), 
      main="Previous Campaign Outcome vs Current Subscrption")
 ```
+
+** Why did the previous campaign contain so many non-existant responses? **
+
+```{r}
+ggplot(bankfull, aes(x = subscribed, fill = prev_outcome)) + 
+  geom_bar() + 
+  labs(title = "How many customers from previous campaign also bought into current subscription?")
+```
+
+** Is there any positive correlation between having a loan and a subscription? ** 
+
+```{r}
+ggplot(bankfull, aes(x = subscribed, fill = housing)) + 
+  geom_bar() + 
+  labs(title = "Do customers with a housing loan tend to subscribe?")
+
+ggplot(bankfull, aes(x = subscribed, fill = loan)) + 
+  geom_bar() + 
+  labs(title = "Do customers with a personal loan tend to subscribe?")
+
+```
+
+** Let's look at the age of our customers **
+
+```{r}
+ggplot(bankfull, aes(x = age, fill = subscribed)) + 
+  geom_histogram(binwidth = 5) + 
+  labs(title = "Age distrubtion of current bank clients and those who subscribed") 
+```
+
 
 
 The value __duration__ refers to the length of time the customer was last 
