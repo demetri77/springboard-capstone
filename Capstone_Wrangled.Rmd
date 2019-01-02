@@ -1,5 +1,5 @@
 ---
-title: "Banking Capstone Wrangled"
+title: "Banking Capstone Data Wrangled"
 author: "Demetri Lee"
 date: "December 1, 2018"
 output: html_document
@@ -23,15 +23,14 @@ banking services.
 
 **Read in the dataset with values delimited by semi-colons along with 
 designated column types.**
-
 ```{r}
 bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
 ```
 
 Rename variables to be more descriptive and avoid use of periods (".")
-
 ```{r}
 bankfull <- rename(bankfull, edu_lvl = "education")
+bankfull <- rename(bankfull, cred_def = "default")
 bankfull <- rename(bankfull, duration_sec = "duration")
 bankfull <- rename(bankfull, contact_typ = "contact")
 bankfull <- rename(bankfull, contact_cnt = "campaign")
@@ -50,9 +49,7 @@ the dependent variable to something more descriptive than simply, 'y'.
 bankfull <- rename(bankfull, subscribed = y)
 ```
 
-
 Replace all periods ('.') with underscores ('_') for legibility
-
 ```{r}
 etemp <- bankfull$edu_lvl
 bankfull$edu_lvl <- gsub("\\.", "_", etemp)
@@ -60,16 +57,17 @@ bankfull$edu_lvl <- gsub("\\.", "_", etemp)
 
 There are only 2 possible values for the dependent variable, "subscribed". As
 such I'll convert the variable to type factor.
-
 ```{r}
-#is.factor(bankfull$subscribed)
 bankfull$subscribed <- as.factor(bankfull$subscribed)
+```
 
+The variable prev_outcome contains the result of the previous marketing 
+campaign with values "failure", "nonexistent", and "success".
+```{r}
 bankfull$prev_outcome <- as.factor(bankfull$prev_outcome)
 ```
 
 Take a glimpse at the dataset
-
 ```{r}
 glimpse(bankfull)
 ```
@@ -85,7 +83,6 @@ ggplot(bankfull, aes(x = subscribed)) + geom_bar() + labs(title = "How many clie
 
 How many clients from the previous campaign also signed up for a term deposit 
 this time around? Similar to looking for a repeat customer.
-
 ```{r}
 xtabs(~prev_outcome+subscribed, bankfull)
 ggplot(bankfull, aes(prev_outcome)) + geom_bar() + labs(title = "How many clients subscribed to a previous campaign?")
@@ -94,16 +91,18 @@ plot(xtabs(~prev_outcome+subscribed, bankfull),
 ```
 
 ** Why did the previous campaign contain so many non-existant responses? **
-
 ```{r}
 ggplot(bankfull, aes(x = subscribed, fill = prev_outcome)) + 
   geom_bar() + 
   labs(title = "How many customers from previous campaign also bought into current subscription?")
 ```
 
-** Is there any positive correlation between having a loan and a subscription? ** 
-
+** Is there any positive correlation between having a default on credit or having a loan and a subscription? ** 
 ```{r}
+ggplot(bankfull, aes(x = subscribed, fill = cred_def)) + 
+  geom_bar() + 
+  labs(title = "Do customers with credit in default tend to describe?")
+
 ggplot(bankfull, aes(x = subscribed, fill = housing)) + 
   geom_bar() + 
   labs(title = "Do customers with a housing loan tend to subscribe?")
@@ -112,7 +111,14 @@ ggplot(bankfull, aes(x = subscribed, fill = loan)) +
   geom_bar() + 
   labs(title = "Do customers with a personal loan tend to subscribe?")
 
+ggplot(bankfull, aes(x = housing, fill = subscribed)) + 
+  geom_bar() + 
+  facet_wrap(~loan)
+
 ```
+
+__ It seems those with defaults on credit or personal loans are not lightly to 
+subscribe but those with a housing loan may subscribe.__
 
 ** Let's look at the age of our customers **
 
@@ -122,9 +128,15 @@ ggplot(bankfull, aes(x = age, fill = subscribed)) +
   labs(title = "Age distrubtion of current bank clients and those who subscribed") 
 ```
 
+```{r}
+ggplot(bankfull, aes(x = subscribed, y = age)) + 
+  geom_boxplot() + 
+  labs(title = "Subscription rates by age")
+```
 
 
-The value __duration__ refers to the length of time the customer was last 
+
+The variable __duration__ refers to the length of time the customer was last 
 contacted, in seconds. Important note:  this attribute highly affects the 
 output target (e.g., if duration=0 then subscribed="no"). Yet, the duration 
 is not known before a call is performed. Also, after the end of the call 
@@ -145,15 +157,6 @@ plot(density(bankfull$age), main="Density of Customer Age")
 ggplot(bankfull, aes(x=age)) + geom_bar()
 ggplot(bankfull, aes(x=age)) + geom_histogram(binwidth = 1)
 ```
-Pie chart of Customers' Marital Status
-
-```{r}
-#table(bankfull$marital)
-#pie(table(bankfull$marital))
-
-```
-
-
 
 ```{r fig.cap = "Contact Type vs Subscribed"}
 #count(bankfull, vars = day_of_week)
@@ -196,4 +199,9 @@ How did a previous campaign perform?
 ggplot(bankfull, aes(x = prev_outcome)) + geom_bar()
 ```
 
+
+Write the revised dataset into a conclusive file.
+```{r}
+write_csv(bankfull, path="bankfull_clean.csv")
+```
 

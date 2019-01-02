@@ -1,0 +1,38 @@
+---
+title: "Machine Learning applied to Banking"
+author: "Demetri Lee"
+date: "December 27, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(caret)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Trying to predict the success of bank telemarketing
+
+I'm trying to predict the success of telemarketing calls for a bank that's 
+selling long-term deposits. A Portuguese retail bank was addressed, with data 
+collected from 2008 to 2013, thus including the effects of the recent 
+financial crisis of 2008. With 21 features available for analysis, I hope to 
+derive knowledge for a model that would confirm how to better focus resources 
+towards clients with a high chance of agreeing to registering for extra 
+banking services. 
+
+```{r}
+bankfull_clean <- read_csv("bankfull_clean.csv")
+```
+
+## Logistic Regression
+```{r}
+log_model <- glm(subscribed~., data=bankfull_clean, family="binomial")
+```
+
+
+## Random Forest
+```{r}
+library(randomForest)
+```
+
