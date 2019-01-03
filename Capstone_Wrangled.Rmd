@@ -1,5 +1,5 @@
 ---
-title: "Banking Capstone Data Wrangled"
+title: "Banking Capstone - Data Wrangling"
 author: "Demetri Lee"
 date: "December 1, 2018"
 output: html_document
@@ -13,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Trying to predict the success of bank telemarketing
 
-I'm trying to predict the success of telemarketing calls for a bank that's 
+I'm working on predicting the success of telemarketing calls for a bank that's 
 selling long-term deposits. A Portuguese retail bank was addressed, with data 
 collected from 2008 to 2013, thus including the effects of the recent 
 financial crisis of 2008. With 21 features available for analysis, I hope to 
@@ -24,10 +24,63 @@ banking services.
 **Read in the dataset with values delimited by semi-colons along with 
 designated column types.**
 ```{r}
-bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
+#bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iffccccccciiiicdddddc")
+bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iffcffffffiiiicdddddc")
 ```
 
-Rename variables to be more descriptive and avoid use of periods (".")
+### This is the data dictionary provided by the respective retail bank:
+
+**Bank client data**
+
+1. age, numeric
+2. job: type of job, categorical: 'admin.','blue-collar','entrepreneur',
+'housemaid','management','retired','self-employed','services','student',
+'technician','unemployed','unknown'
+3. marital: marital status, categorical: 'divorced','married','single',
+'unknown'; note: 'divorced' means divorced or widowed)
+4. education (categorical: 'basic.4y','basic.6y','basic.9y','high.school',
+'illiterate','professional.course','university.degree','unknown')
+5. default: has credit in default? (categorical: 'no','yes','unknown')
+6. housing: has housing loan? (categorical: 'no','yes','unknown')
+7. loan: has personal loan? (categorical: 'no','yes','unknown')
+
+**Related with the last contact of the current campaign**
+
+8. contact: contact communication type (categorical: 'cellular','telephone') 
+9. month: last contact month of year (categorical: 'jan', 'feb', 'mar', ..., 
+'nov', 'dec')
+10. day_of_week: last contact day of the week (categorical: 'mon','tue','wed',
+'thu','fri')
+11. duration: last contact duration, in seconds (numeric). 
+Important note: this attribute highly affects the output target (e.g., if 
+duration=0 then y='no'). Yet, the duration is not known before a call is 
+performed. Also, after the end of the call y is obviously known. Thus, this 
+input should only be included for benchmark purposes and should be discarded 
+if the intention is to have a realistic predictive model.
+
+**Other attributes**
+
+12. campaign: number of contacts performed during this campaign and for this 
+client (numeric, includes last contact)
+13. pdays: number of days that passed by after the client was last contacted 
+from a previous campaign (numeric; 999 means client was not previously contacted)
+14. previous: number of contacts performed before this campaign and for this 
+client (numeric)
+15. poutcome: outcome of the previous marketing campaign (categorical: 
+'failure','nonexistent','success')
+
+**Social and economic context attributes**
+
+16. emp.var.rate: employment variation rate - quarterly indicator (numeric)
+17. cons.price.idx: consumer price index - monthly indicator (numeric) 
+18. cons.conf.idx: consumer confidence index - monthly indicator (numeric) 
+19. euribor3m: euribor 3 month rate - daily indicator (numeric)
+20. nr.employed: number of employees - quarterly indicator (numeric)
+
+**Output variable (desired target)**
+21 - y - has the client subscribed a term deposit? (binary: 'yes','no')
+
+Let's rename variables to be more descriptive and avoid use of periods (".")
 ```{r}
 bankfull <- rename(bankfull, edu_lvl = "education")
 bankfull <- rename(bankfull, cred_def = "default")
@@ -53,6 +106,7 @@ Replace all periods ('.') with underscores ('_') for legibility
 ```{r}
 etemp <- bankfull$edu_lvl
 bankfull$edu_lvl <- gsub("\\.", "_", etemp)
+bankfull$edu_lvl <- as.factor(bankfull$edu_lvl)
 ```
 
 There are only 2 possible values for the dependent variable, "subscribed". As
@@ -67,8 +121,9 @@ campaign with values "failure", "nonexistent", and "success".
 bankfull$prev_outcome <- as.factor(bankfull$prev_outcome)
 ```
 
-Take a glimpse at the dataset
+Take a quick check of the dataset with summary and glimpse.
 ```{r}
+summary(bankfull)
 glimpse(bankfull)
 ```
 
@@ -117,10 +172,10 @@ ggplot(bankfull, aes(x = housing, fill = subscribed)) +
 
 ```
 
-__ It seems those with defaults on credit or personal loans are not lightly to 
-subscribe but those with a housing loan may subscribe.__
+_It seems those with defaults on credit or personal loans are not lightly to 
+subscribe but those with a housing loan may subscribe._
 
-** Let's look at the age of our customers **
+**Let's look at the age of our customers**
 
 ```{r}
 ggplot(bankfull, aes(x = age, fill = subscribed)) + 
@@ -136,11 +191,11 @@ ggplot(bankfull, aes(x = subscribed, y = age)) +
 
 
 
-The variable __duration__ refers to the length of time the customer was last 
+The variable _duration_ refers to the length of time the customer was last 
 contacted, in seconds. Important note:  this attribute highly affects the 
 output target (e.g., if duration=0 then subscribed="no"). Yet, the duration 
 is not known before a call is performed. Also, after the end of the call 
-__subscribed__ is obviously known. Thus, this input should only be included 
+_subscribed_ is obviously known. Thus, this input should only be included 
 for benchmark purposes and should be discarded if the intention is to have a 
 realistic predictive model.
 
@@ -148,7 +203,7 @@ realistic predictive model.
 bankfull <- bankfull %>% mutate(duration_min = duration_sec/60)
 summary(bankfull$duration_min)
 boxplot(bankfull$duration_min)
-#ggplot(bankfull, aes(x=duration)) + geom_bar()
+ggplot(bankfull, aes(x=duration_min)) + geom_bar()
 ```
 
 
@@ -164,7 +219,6 @@ ggplot(bankfull, aes(x=age)) + geom_histogram(binwidth = 1)
 ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + geom_bar()
 #try geom_col()
 count(bankfull)
-
 ```
 
 Outcome of previous campaign
@@ -191,8 +245,6 @@ print(accept_pct)
 ```
 test = `r reject_cnt + 20`
 
-
-
 How did a previous campaign perform?
 
 ```{r fig.cap = "failure = 10.3% vs success = 3.3% while remaining 35,563 were non-existent"}
@@ -200,7 +252,7 @@ ggplot(bankfull, aes(x = prev_outcome)) + geom_bar()
 ```
 
 
-Write the revised dataset into a conclusive file.
+Write the revised dataset into a cleaned-up file.
 ```{r}
 write_csv(bankfull, path="bankfull_clean.csv")
 ```

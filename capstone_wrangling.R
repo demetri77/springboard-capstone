@@ -1,13 +1,14 @@
 library(tidyverse)
 
-
 ## Read in file
 #bankfull <- read.table("bank-additional-full.csv",header=TRUE,sep=";")
 #bankfull <- read_delim("bank-additional-full.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
-bankfull <- read_delim("bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
+#bankfull <- read_delim("bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
+bankfull <- read_delim("bank-additional.csv", delim = ";", col_types = "iffcffffffiiiicdddddc")
 
 #str(bankfull)
 bankfull <- rename(bankfull, edu_lvl = "education")
+bankfull <- rename(bankfull, cred_def = "default")
 bankfull <- rename(bankfull, duration_sec = "duration")
 bankfull <- rename(bankfull, contact_typ = "contact")
 bankfull <- rename(bankfull, contact_cnt = "campaign")
@@ -22,6 +23,7 @@ bankfull <- rename(bankfull, subscribed = y)
 
 etemp <- bankfull$edu_lvl
 bankfull$edu_lvl <- gsub("\\.", "_", etemp)
+bankfull$edu_lvl <- as.factor(bankfull$edu_lvl)
 
 #is.factor(bankfull$subscribed)
 bankfull$subscribed <- as.factor(bankfull$subscribed)

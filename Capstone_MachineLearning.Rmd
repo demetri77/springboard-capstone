@@ -1,5 +1,5 @@
 ---
-title: "Machine Learning applied to Banking"
+title: "Banking Capstone - Machine Learning Applied"
 author: "Demetri Lee"
 date: "December 27, 2018"
 output: html_document
@@ -22,7 +22,8 @@ towards clients with a high chance of agreeing to registering for extra
 banking services. 
 
 ```{r}
-bankfull_clean <- read_csv("bankfull_clean.csv")
+#bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "iccccccccciiiicdddddc")
+bankfull_clean <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
 ```
 
 ## Logistic Regression
@@ -34,5 +35,16 @@ log_model <- glm(subscribed~., data=bankfull_clean, family="binomial")
 ## Random Forest
 ```{r}
 library(randomForest)
+n <- nrow(bankfull_clean)
+
+rf.train.1 <- data.combined[1:n, c("age", "edu_lvl")]
+rf.label <- as.factor(bankfull_clean$subscribed)
+
+set.seed(1234)
+rf.1 <- randomForest(x=rf.train.1, y=rf.label, importance=TRUE, ntree=500)
+rf.1
+
+varImpPlot(rf.1)
+
 ```
 
