@@ -81,7 +81,7 @@ ggplot(bankfull, aes(x=euribor3m, fill=subscribed)) + geom_bar(stat="count")
 #dailyTally[4] <- tally(bankfull, day_of_week == "fri")
 #tibble(weekdays, dailyTally)
 
-groupby
+#groupby
 
 ggplot(bankfull, aes(x=days_of_week)) + geom_bar()
 
@@ -115,14 +115,14 @@ model <- glm(subscribed ~ ., data = bankfull, family = binomial)
 summary(model)
 
 
-#bankfull %>% print(n = 10)
-
-#reject_cnt <- tally(bankfull, subscribed == "no")
-#accept_cnt <- tally(bankfull, subscribed == "yes")
-#drows <- nrows()
-#print("Only ", accept_cnt/nrows(bankfull), "%")
-
+# ------------------------------
 # summarytools
+# ------------------------------
+library(summarytools)
+# freq()
+# ctable()
+# descr()
+# dfsummary()
 
 # Write/Export dataset
-write_csv(bank, path="~/springboard-capstone/bank_new.csv")
+write_csv(bankfull, path="bankfull_clean.csv")

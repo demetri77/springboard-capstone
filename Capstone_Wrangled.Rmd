@@ -1,5 +1,5 @@
 ---
-title: "Banking Capstone - Data Wrangling"
+title: "Banking Capstone - Data Wrangling and Stastical Analysis"
 author: "Demetri Lee"
 date: "December 1, 2018"
 output: html_document
@@ -7,7 +7,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-library(ggplot2)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -21,39 +20,34 @@ derive knowledge for a model that would confirm how to better focus resources
 towards clients with a high chance of agreeing to registering for extra 
 banking services. 
 
-**Read in the dataset with values delimited by semi-colons along with 
-designated column types.**
-```{r}
-#bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iffccccccciiiicdddddc")
-bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iffcffffffiiiicdddddc")
-```
+## Step 1: Data Wrangling
 
 ### This is the data dictionary provided by the respective retail bank:
 
 **Bank client data**
 
 1. age, numeric
-2. job: type of job, categorical: 'admin.','blue-collar','entrepreneur',
-'housemaid','management','retired','self-employed','services','student',
-'technician','unemployed','unknown'
-3. marital: marital status, categorical: 'divorced','married','single',
-'unknown'; note: 'divorced' means divorced or widowed)
-4. education (categorical: 'basic.4y','basic.6y','basic.9y','high.school',
-'illiterate','professional.course','university.degree','unknown')
-5. default: has credit in default? (categorical: 'no','yes','unknown')
-6. housing: has housing loan? (categorical: 'no','yes','unknown')
-7. loan: has personal loan? (categorical: 'no','yes','unknown')
+2. job: type of job (categorical: admin, blue-collar, entrepreneur,
+housemaid, management, retired, self-employed, services, student,
+technician, unemployed, unknown)
+3. marital: marital status (categorical: divorced, married, single,
+unknown; note: 'divorced' means divorced or widowed)
+4. education: categorical (basic.4y, basic.6y, basic.9y, high.school,
+illiterate, professional.course, university.degree, unknown)
+5. default: has credit in default? (categorical: no, yes, unknown)
+6. housing: has housing loan? (categorical: no, yes, unknown)
+7. loan: has personal loan? (categorical: no, yes, unknown)
 
 **Related with the last contact of the current campaign**
 
-8. contact: contact communication type (categorical: 'cellular','telephone') 
-9. month: last contact month of year (categorical: 'jan', 'feb', 'mar', ..., 
+8. contact: contact communication type (categorical: cellular, telephone) 
+9. month: last contact month of year (categorical: jan', 'feb', 'mar', ..., 
 'nov', 'dec')
-10. day_of_week: last contact day of the week (categorical: 'mon','tue','wed',
-'thu','fri')
+10. day_of_week: last contact day of the week (categorical: mon, tue, wed,
+thu, fri)
 11. duration: last contact duration, in seconds (numeric). 
 Important note: this attribute highly affects the output target (e.g., if 
-duration=0 then y='no'). Yet, the duration is not known before a call is 
+duration=0 then y='no). Yet, the duration is not known before a call is 
 performed. Also, after the end of the call y is obviously known. Thus, this 
 input should only be included for benchmark purposes and should be discarded 
 if the intention is to have a realistic predictive model.
@@ -67,7 +61,7 @@ from a previous campaign (numeric; 999 means client was not previously contacted
 14. previous: number of contacts performed before this campaign and for this 
 client (numeric)
 15. poutcome: outcome of the previous marketing campaign (categorical: 
-'failure','nonexistent','success')
+failure, nonexistent, success)
 
 **Social and economic context attributes**
 
@@ -78,12 +72,21 @@ client (numeric)
 20. nr.employed: number of employees - quarterly indicator (numeric)
 
 **Output variable (desired target)**
-21 - y - has the client subscribed a term deposit? (binary: 'yes','no')
+
+21. y - has the client subscribed a term deposit? (binary: yes, no)
+
+**Read in the dataset with values delimited by semi-colons along with 
+designated column types as indicated by the data dictionary.**
+```{r}
+ bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
+#bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "ifffffffffiiiicdddddc")
+```
 
 Let's rename variables to be more descriptive and avoid use of periods (".")
 ```{r}
 bankfull <- rename(bankfull, edu_lvl = "education")
-bankfull <- rename(bankfull, cred_def = "default")
+bankfull <- rename(bankfull, cred_default = "default")
+bankfull <- rename(bankfull, mortgage = "housing")
 bankfull <- rename(bankfull, duration_sec = "duration")
 bankfull <- rename(bankfull, contact_typ = "contact")
 bankfull <- rename(bankfull, contact_cnt = "campaign")
@@ -96,16 +99,23 @@ bankfull <- rename(bankfull, cons_conf_idx = "cons.conf.idx")
 bankfull <- rename(bankfull, num_employed = "nr.employed")
 ```
 
-The goal is to determine what factors lead to a subscription so I'll rename 
-the dependent variable to something more descriptive than simply, 'y'.
+The goal is to determine which factors lead to a subscription so I'll rename 
+the dependent variable to something more descriptive than simply, _y_.
 ```{r}
 bankfull <- rename(bankfull, subscribed = y)
 ```
 
-Replace all periods ('.') with underscores ('_') for legibility
+Replace all periods ('.') with underscores ('_') for legibility.
+Also change the _missing values_ to NA.
 ```{r}
+jtemp <- bankfull$job
+bankfull$job <- gsub("\\.", "", jtemp)
+bankfull$job[bankfull$job == "unknown"] <- NA
+bankfull$job <- as.factor(bankfull$job)
+
 etemp <- bankfull$edu_lvl
 bankfull$edu_lvl <- gsub("\\.", "_", etemp)
+bankfull$edu_lvl[bankfull$edu == "unknown"] <- NA
 bankfull$edu_lvl <- as.factor(bankfull$edu_lvl)
 ```
 
@@ -116,20 +126,30 @@ bankfull$subscribed <- as.factor(bankfull$subscribed)
 ```
 
 The variable prev_outcome contains the result of the previous marketing 
-campaign with values "failure", "nonexistent", and "success".
+campaign with categorical values "failure", "nonexistent", and "success".
 ```{r}
 bankfull$prev_outcome <- as.factor(bankfull$prev_outcome)
 ```
 
 Take a quick check of the dataset with summary and glimpse.
 ```{r}
-summary(bankfull)
 glimpse(bankfull)
+summary(bankfull)
 ```
+
+
+Let's take care of _missing values_ as necessary
+```{r}
+bankfull$marital[bankfull$marital == "unknown"] <- NA
+bankfull$cred_default[bankfull$cred_default == "unknown"] <- NA
+bankfull$prev_outcome[bankfull$prev_outcome == "nonexistent"] <- NA
+
+```
+
 
 ### Including Plots
 
-A cursory look at the subscribed variable will show most customers do not sign 
+A cursory look at the `subscribe` variable will show most customers do not sign 
 up for the extra service.
 ```{r}
 prop.table(table(bankfull$subscribed))
@@ -137,36 +157,41 @@ ggplot(bankfull, aes(x = subscribed)) + geom_bar() + labs(title = "How many clie
 ```
 
 How many clients from the previous campaign also signed up for a term deposit 
-this time around? Similar to looking for a repeat customer.
+this time around? This should be similar to checking for a repeat customer.
 ```{r}
 xtabs(~prev_outcome+subscribed, bankfull)
 ggplot(bankfull, aes(prev_outcome)) + geom_bar() + labs(title = "How many clients subscribed to a previous campaign?")
 plot(xtabs(~prev_outcome+subscribed, bankfull), 
-     main="Previous Campaign Outcome vs Current Subscrption")
+     main="Previous Outcome vs Current Subscrption")
 ```
 
-** Why did the previous campaign contain so many non-existant responses? **
+Unfortunately there is a large number of "nonexistent" values for `prev_outome`.
+
+**Although most of the inside sales from the previous campaign resulted in 
+failed attempts, the large number of nonexistant results makes this features 
+useless.**
 ```{r}
 ggplot(bankfull, aes(x = subscribed, fill = prev_outcome)) + 
   geom_bar() + 
   labs(title = "How many customers from previous campaign also bought into current subscription?")
 ```
 
-** Is there any positive correlation between having a default on credit or having a loan and a subscription? ** 
+**Checking elsewhere, is there any positive correlation between those who 
+`subscribe` and have a default on credit, mortgage, or a personal loan?** 
 ```{r}
-ggplot(bankfull, aes(x = subscribed, fill = cred_def)) + 
+ggplot(bankfull, aes(x = subscribed, fill = cred_default)) + 
   geom_bar() + 
   labs(title = "Do customers with credit in default tend to describe?")
 
-ggplot(bankfull, aes(x = subscribed, fill = housing)) + 
+ggplot(bankfull, aes(x = subscribed, fill = mortgage)) + 
   geom_bar() + 
-  labs(title = "Do customers with a housing loan tend to subscribe?")
+  labs(title = "Do customers with a mortgage tend to subscribe?")
 
 ggplot(bankfull, aes(x = subscribed, fill = loan)) + 
   geom_bar() + 
   labs(title = "Do customers with a personal loan tend to subscribe?")
 
-ggplot(bankfull, aes(x = housing, fill = subscribed)) + 
+ggplot(bankfull, aes(x = mortgage, fill = subscribed)) + 
   geom_bar() + 
   facet_wrap(~loan)
 
@@ -251,6 +276,14 @@ How did a previous campaign perform?
 ggplot(bankfull, aes(x = prev_outcome)) + geom_bar()
 ```
 
+_Posit questions as they come up from observations_
+
+1. Can you count something interesting?
+2. Can you find some trends (high, low, increase, decrease, anomalies)?
+3. Can you make a bar plot or a histogram?
+4. Can you compare two related quantities?
+5. Can you make a scatterplot?
+6. Can you make a time-series plot?
 
 Write the revised dataset into a cleaned-up file.
 ```{r}

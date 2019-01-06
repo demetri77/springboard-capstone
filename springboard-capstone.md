@@ -1,3 +1,14 @@
+## Bank Marketing
+45,211 instances with 20 attributes; Classification
+
+The data is related with direct marketing campaigns (phone calls) of a Portuguese banking institution. The classification goal is to predict if the client will subscribe a term deposit (variable y).
+
+[Bank Marketing](https://archive.ics.uci.edu/ml/datasets/Bank+Marketing)
+
+* Will the client subscribe to a term deposit? __Logistic Regression__
+* What are the client attributes?
+* What factors will contribute to subscribing to term deposit?
+
 ## Diabetes in 130 US hospitals from 1999-2008
 101,700 instances with 50 attributes; Classification
 
@@ -18,18 +29,4 @@ This data has been prepared to analyze factors related to readmission as well as
 * ICD-9 diagnostic code for Diabetes = 250
 * Glucose serum test
 * A1c (glucose) test
-
-## Bank Marketing
-45,211 instances with 20 attributes; Classification
-
-The data is related with direct marketing campaigns (phone calls) of a Portuguese banking institution. The classification goal is to predict if the client will subscribe a term deposit (variable y).
-
-[Bank Marketing](https://archive.ics.uci.edu/ml/datasets/Bank+Marketing)
-
-* Will the client subscribe to a term deposit? __Logistic Regression__
-* What are the client attributes?
-* What factors will contribute to subscribing to term deposit?
-
-
-## How does poverty/income affects children's health/education?
 
