@@ -125,11 +125,7 @@ such I'll convert the variable to type factor.
 bankfull$subscribed <- as.factor(bankfull$subscribed)
 ```
 
-The variable prev_outcome contains the result of the previous marketing 
-campaign with categorical values "failure", "nonexistent", and "success".
-```{r}
-bankfull$prev_outcome <- as.factor(bankfull$prev_outcome)
-```
+
 
 Take a quick check of the dataset with summary and glimpse.
 ```{r}
@@ -141,9 +137,13 @@ summary(bankfull)
 Let's take care of _missing values_ as necessary
 ```{r}
 bankfull$marital[bankfull$marital == "unknown"] <- NA
-bankfull$cred_default[bankfull$cred_default == "unknown"] <- NA
-bankfull$prev_outcome[bankfull$prev_outcome == "nonexistent"] <- NA
+bankfull$marital <- as.factor(bankfull$marital)
 
+bankfull$cred_default[bankfull$cred_default == "unknown"] <- NA
+bankfull$cred_default <- as.factor(bankfull$cred_default)
+
+bankfull$prev_outcome[bankfull$prev_outcome == "nonexistent"] <- NA
+bankfull$prev_outcome <- as.factor(bankfull$prev_outcome)
 ```
 
 
@@ -168,8 +168,7 @@ plot(xtabs(~prev_outcome+subscribed, bankfull),
 Unfortunately there is a large number of "nonexistent" values for `prev_outome`.
 
 **Although most of the inside sales from the previous campaign resulted in 
-failed attempts, the large number of nonexistant results makes this features 
-useless.**
+failed attempts, the large number of NA results makes this feature useless.**
 ```{r}
 ggplot(bankfull, aes(x = subscribed, fill = prev_outcome)) + 
   geom_bar() + 
