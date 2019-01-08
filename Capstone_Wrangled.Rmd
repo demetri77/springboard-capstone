@@ -20,8 +20,6 @@ derive knowledge for a model that would confirm how to better focus resources
 towards clients with a high chance of agreeing to registering for extra 
 banking services. 
 
-## Step 1: Data Wrangling
-
 ### This is the data dictionary provided by the respective retail bank:
 
 **Bank client data**
@@ -73,13 +71,13 @@ failure, nonexistent, success)
 
 **Output variable (desired target)**
 
-21. y - has the client subscribed a term deposit? (binary: yes, no)
+21. y: has the client subscribed a term deposit? (binary: yes, no)
 
 **Read in the dataset with values delimited by semi-colons along with 
 designated column types as indicated by the data dictionary.**
 ```{r}
- bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
-#bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "ifffffffffiiiicdddddc")
+#bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
+ bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "ifffffffffiiiicdddddc")
 ```
 
 Let's rename variables to be more descriptive and avoid use of periods (".")
@@ -99,8 +97,15 @@ bankfull <- rename(bankfull, cons_conf_idx = "cons.conf.idx")
 bankfull <- rename(bankfull, num_employed = "nr.employed")
 ```
 
+As per data dictionary, if `duration`equals 0 then customers is automatically 
+not subscribed. Let's create a new feature/variable, `contacted` for results.
+```{r}
+bankfull <- mutate(bankfull, contacted = (duration_sec != "0"))
+```
+
+
 The goal is to determine which factors lead to a subscription so I'll rename 
-the dependent variable to something more descriptive than simply, _y_.
+the dependent variable to `subscribed`, which is more descriptive than just `y`.
 ```{r}
 bankfull <- rename(bankfull, subscribed = y)
 ```
@@ -115,7 +120,7 @@ bankfull$job <- as.factor(bankfull$job)
 
 etemp <- bankfull$edu_lvl
 bankfull$edu_lvl <- gsub("\\.", "_", etemp)
-bankfull$edu_lvl[bankfull$edu == "unknown"] <- NA
+bankfull$edu_lvl[bankfull$edu_lvl == "unknown"] <- NA
 bankfull$edu_lvl <- as.factor(bankfull$edu_lvl)
 ```
 
@@ -141,6 +146,9 @@ bankfull$marital <- as.factor(bankfull$marital)
 
 bankfull$cred_default[bankfull$cred_default == "unknown"] <- NA
 bankfull$cred_default <- as.factor(bankfull$cred_default)
+
+bankfull$housing[bankfull$housing == "unknown"] <- NA
+bankfull$housing <- as.factor(bankfull$housing)
 
 bankfull$prev_outcome[bankfull$prev_outcome == "nonexistent"] <- NA
 bankfull$prev_outcome <- as.factor(bankfull$prev_outcome)

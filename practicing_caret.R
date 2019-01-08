@@ -16,3 +16,78 @@ predictions <- predict(modelFit, newdata=testing)
 predictions
 
 confusionMatrix(predictions, testing$type)
+
+# -------------------
+# capstone style
+# -------------------
+library(tidyverse)
+bankfull_clean <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "ifffffffffiiiicdddddc")
+#bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "iccccccccciiiicdddddc")
+#bankfull_clean <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
+
+## Logistic Regression
+inTrain <- createDataPartition(y=bankfull_clean, p=0.75, list=FALSE)
+training <- bankfull_clean[ inTrain,]
+testing  <- bankfull_clean[-inTrain,]
+
+set.seed(13456)
+modelFit <- train(y ~ ., data=training, model="glm")
+
+predictions <- predict(modelFit, newdata=testData)
+
+confusionMatrix(predictions)
+
+
+# -------------------
+# caret vignettes
+# https://cran.r-project.org/web/packages/caret/vignettes/caret.html
+# -------------------
+
+library(mlbench)
+data(Sonar)
+
+set.seed(107)
+inTrain <- createDataPartition(
+  y = Sonar$Class,
+  ## the outcome data are needed
+  p = .75,
+  ## The percentage of data in the
+  ## training set
+  list = FALSE
+)
+## The format of the results
+
+## The output is a set of integers for the rows of Sonar
+## that belong in the training set.
+str(inTrain)
+#>  int [1:157, 1] 1 2 3 6 7 9 10 11 12 13 ...
+#>  - attr(*, "dimnames")=List of 2
+#>   ..$ : NULL
+#>   ..$ : chr "Resample1"
+
+# -------------------
+# Max Kuhn's webinar
+# -------------------
+
+library(C50)
+data(churn)
+str(churnTrain)
+
+predictors <- names(churnTrain)[names(churnTrain) != "churn"]
+#names(churnTrain)
+colnames(churnTrain)
+
+set.seed(1)
+inTrainingSet <- createDataPartition(allData$churn,
+                                     p = 0.75, list = FALSE)
+churnTrain <- allData[ inTrainingSet,]
+churnTest  <- allData[-inTrainingSet,]
+
+# Other DataSplitting fxn:
+# createFolds, createMultiFolds, createResamples
+
+# preProcess calcuates values that can be used to apply to any data set
+
+# Current methods: centering, scaling, ...
+
+numerics <- c("account_length", "total_day_calls")

@@ -21,6 +21,8 @@ bankfull <- rename(bankfull, cons_conf_idx = "cons.conf.idx")
 bankfull <- rename(bankfull, num_employed = "nr.employed")
 bankfull <- rename(bankfull, subscribed = y)
 
+mutate(bankfull, duration_sec == "0")
+
 etemp <- bankfull$edu_lvl
 bankfull$edu_lvl <- gsub("\\.", "_", etemp)
 bankfull$edu_lvl <- as.factor(bankfull$edu_lvl)
@@ -32,7 +34,7 @@ bankfull$prev_outcome <- as.factor(bankfull$prev_outcome)
 glimpse(bankfull)
 
 summary(bankfull)
-colnames(bankfull)
+#colnames(bankfull)
 
 #tally(bankfull, subscribed == "0")
 #tally(bankfull, subscribed == "1")
@@ -40,6 +42,8 @@ summary(bankfull$subscribed)
 
 ggplot(bankfull, aes(x = subscribed)) + geom_bar()
 ggplot(bankfull, aes(x = prev_outcome)) + geom_bar()
+
+bankfull$prev_outcome[bankfull$prev_outcome == "nonexistent"] <- NA
 
 xtabs(~prev_outcome+subscribed, bankfull)
 plot(xtabs(~prev_outcome+subscribed, bankfull))

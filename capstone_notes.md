@@ -37,8 +37,17 @@ changing edu_lvl factors to digits, such as 1 for primary education.
 
 Import --> tidy (tidyr) --> transform (dplyr) --> visualize --> model --> communicate
                                 | ------------------------------- |
-# If you really want percentages.
+
+__If you really want percentages.__
 prop.table(table(titanic$Survived))
+
+__facet_wrap__
+ggplot(titanic, aes(x = Sex, fill = Survived)) + 
+  theme_bw() +
+  facet_wrap(~ Pclass) +
+  geom_bar() +
+  labs(y = "Passenger Count",
+       title = "Titanic Survival Rates by Pclass and Sex")
 
 geom_quasirandom()
 ggrepel()
@@ -101,8 +110,21 @@ The random forest algorithm is used in a lot of different fields, like Banking, 
 
 ## caret package tutorials ##
 http://www.edii.uclm.es/~useR-2013/Tutorials/kuhn/user_caret_2up.pdf
-http://cran.r-project.org/web/packages/caret/vignettes/caret.pdf
+XX -> http://cran.r-project.org/web/packages/caret/vignettes/caret.pdf
 https://cran.r-project.org/web/packages/caret/vignettes/caret.html
+http://www.jstatsoft.org/v28/i05/paper
 
 R pkg required:
 e1071, caret, doSNOW, ipred, and xgboost
+
+
+**Missing inputs: strategies**
+
+* Delete row/column
+  * index_NA <- which(is.na(loan_data$emp_length))
+  * loan_data_no_NA <- loan_data[-c(index_NA),]
+* Replace
+  * index_NA <- which(is.na(loan_data$emp_length))
+  * loan_data_replace <- loan_data
+  * loan_data_replace$emp_length[index_NA] <- median(loan_data$emp_length, na.rm = TRUE)
+* Keep NA

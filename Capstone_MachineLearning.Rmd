@@ -22,13 +22,23 @@ towards clients with a high chance of agreeing to registering for extra
 banking services. 
 
 ```{r}
-#bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "iccccccccciiiicdddddc")
-bankfull_clean <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
+bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "iccccccccciiiicdddddc")
+#bankfull_clean <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
 ```
 
 ## Logistic Regression
 ```{r}
-log_model <- glm(subscribed~., data=bankfull_clean, family="binomial")
+inTrain <- createDataPartition(y=bankfull_clean, p=0.75, list=FALSE)
+training <- bankfull_clean[ inTrain,]
+testing  <- bankfull_clean[-inTrain,]
+
+set.seed(13456)
+modelFit <- train(y ~ ., data=training, model="glm")
+
+predictions <- predict(modelFit, newdata=testData)
+
+confusionMatrix(predictions, testing$type)
+
 ```
 
 
