@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
+library(ggplot2)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -24,7 +25,7 @@ banking services.
 
 **Bank client data**
 
-1. age, numeric
+1. age: numeric
 2. job: type of job (categorical: admin, blue-collar, entrepreneur,
 housemaid, management, retired, self-employed, services, student,
 technician, unemployed, unknown)
@@ -77,7 +78,7 @@ failure, nonexistent, success)
 designated column types as indicated by the data dictionary.**
 ```{r}
 #bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
- bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "ifffffffffiiiicdddddc")
+bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "ifffffffffiiiicdddddc")
 ```
 
 Let's rename variables to be more descriptive and avoid use of periods (".")
@@ -97,7 +98,7 @@ bankfull <- rename(bankfull, cons_conf_idx = "cons.conf.idx")
 bankfull <- rename(bankfull, num_employed = "nr.employed")
 ```
 
-As per data dictionary, if `duration`equals 0 then customers is automatically 
+As per data dictionary, if `duration` equals 0 then customers is automatically 
 not subscribed. Let's create a new feature/variable, `contacted` for results.
 ```{r}
 bankfull <- mutate(bankfull, contacted = (duration_sec != "0"))
@@ -108,6 +109,7 @@ The goal is to determine which factors lead to a subscription so I'll rename
 the dependent variable to `subscribed`, which is more descriptive than just `y`.
 ```{r}
 bankfull <- rename(bankfull, subscribed = y)
+table(bankfull$subscribed)
 ```
 
 Replace all periods ('.') with underscores ('_') for legibility.
@@ -115,12 +117,12 @@ Also change the _missing values_ to NA.
 ```{r}
 jtemp <- bankfull$job
 bankfull$job <- gsub("\\.", "", jtemp)
-bankfull$job[bankfull$job == "unknown"] <- NA
+#bankfull$job[bankfull$job == "unknown"] <- NA
 bankfull$job <- as.factor(bankfull$job)
 
 etemp <- bankfull$edu_lvl
 bankfull$edu_lvl <- gsub("\\.", "_", etemp)
-bankfull$edu_lvl[bankfull$edu_lvl == "unknown"] <- NA
+#bankfull$edu_lvl[bankfull$edu_lvl == "unknown"] <- NA
 bankfull$edu_lvl <- as.factor(bankfull$edu_lvl)
 ```
 
@@ -131,33 +133,15 @@ bankfull$subscribed <- as.factor(bankfull$subscribed)
 ```
 
 
-
 Take a quick check of the dataset with summary and glimpse.
 ```{r}
 glimpse(bankfull)
 summary(bankfull)
 ```
 
-
-Let's take care of _missing values_ as necessary
-```{r}
-bankfull$marital[bankfull$marital == "unknown"] <- NA
-bankfull$marital <- as.factor(bankfull$marital)
-
-bankfull$cred_default[bankfull$cred_default == "unknown"] <- NA
-bankfull$cred_default <- as.factor(bankfull$cred_default)
-
-bankfull$housing[bankfull$housing == "unknown"] <- NA
-bankfull$housing <- as.factor(bankfull$housing)
-
-bankfull$prev_outcome[bankfull$prev_outcome == "nonexistent"] <- NA
-bankfull$prev_outcome <- as.factor(bankfull$prev_outcome)
-```
-
-
 ### Including Plots
 
-A cursory look at the `subscribe` variable will show most customers do not sign 
+A cursory look at the `subscribe`variable will show most customers do not sign 
 up for the extra service.
 ```{r}
 prop.table(table(bankfull$subscribed))
@@ -167,10 +151,9 @@ ggplot(bankfull, aes(x = subscribed)) + geom_bar() + labs(title = "How many clie
 How many clients from the previous campaign also signed up for a term deposit 
 this time around? This should be similar to checking for a repeat customer.
 ```{r}
-xtabs(~prev_outcome+subscribed, bankfull)
+#xtabs(~prev_outcome+subscribed, bankfull)
 ggplot(bankfull, aes(prev_outcome)) + geom_bar() + labs(title = "How many clients subscribed to a previous campaign?")
-plot(xtabs(~prev_outcome+subscribed, bankfull), 
-     main="Previous Outcome vs Current Subscrption")
+#plot(xtabs(~prev_outcome+subscribed, bankfull), main="Previous Outcome vs Current Subscrption")
 ```
 
 Unfortunately there is a large number of "nonexistent" values for `prev_outome`.
@@ -181,7 +164,22 @@ failed attempts, the large number of NA results makes this feature useless.**
 ggplot(bankfull, aes(x = subscribed, fill = prev_outcome)) + 
   geom_bar() + 
   labs(title = "How many customers from previous campaign also bought into current subscription?")
+prop.table(table(bankfull$prev_outcome))
 ```
+
+```{r}
+ggplot(bankfull, aes(x = edu_lvl, fill = subscribed)) + 
+  geom_bar() + 
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(title = "Which educational level tends to subscribe?")
+
+ggplot(bankfull, aes(x = job, fill = subscribed)) + 
+  geom_bar() + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  labs(title = "Which job tends to subscribe?")
+
+```
+
 
 **Checking elsewhere, is there any positive correlation between those who 
 `subscribe` and have a default on credit, mortgage, or a personal loan?** 
@@ -211,7 +209,7 @@ subscribe but those with a housing loan may subscribe._
 
 ```{r}
 ggplot(bankfull, aes(x = age, fill = subscribed)) + 
-  geom_histogram(binwidth = 5) + 
+  geom_histogram(binwidth = 10) + 
   labs(title = "Age distrubtion of current bank clients and those who subscribed") 
 ```
 
@@ -235,7 +233,7 @@ realistic predictive model.
 bankfull <- bankfull %>% mutate(duration_min = duration_sec/60)
 summary(bankfull$duration_min)
 boxplot(bankfull$duration_min)
-ggplot(bankfull, aes(x=duration_min)) + geom_bar()
+ggplot(bankfull, aes(x=duration_min, y=subscribed)) + geom_boxplot()
 ```
 
 
@@ -263,7 +261,7 @@ summary(bankfull$prev_outcome)
 
 How many of the same customers subscribed to a long-term deposit service versus those who have not?
 
-```{r echo=TRUE, fig.cap = "Only 11.3% of customers subscribed while an overwhelming 88.7% customers declined"}
+```{r}
 reject_cnt <- tally(bankfull, subscribed == "no")
 reject_pct <- reject_cnt/nrow(bankfull)*100
 accept_cnt <- tally(bankfull, subscribed == "yes")
@@ -279,7 +277,8 @@ test = `r reject_cnt + 20`
 
 How did a previous campaign perform?
 
-```{r fig.cap = "failure = 10.3% vs success = 3.3% while remaining 35,563 were non-existent"}
+```{r}
+
 ggplot(bankfull, aes(x = prev_outcome)) + geom_bar()
 ```
 
