@@ -66,6 +66,31 @@ str(inTrain)
 #>   ..$ : chr "Resample1"
 
 # -------------------
+# Building a Pipeline - Benjamin Manning
+# -------------------
+
+library(caret)
+iris <- datasets::iris
+set.seed(998)
+
+# define 75/25 train/test split of the dataset
+inTraining <- createDataPartition(iris$Species, p=0.75, list=FALSE)
+training <- iris[ inTraining,]
+testing  <- iris[-inTraining,]
+
+# 10-fold cross validation
+fitControl <- trainControl(method="repeatedcv", number=10, repeats=1)
+
+# method = "rf" i.e. Random Forest
+system.time(
+  rfFit1 <- train(Species~., data=training, method="rf", trControl=fitControl)
+)
+#rfFit1 <- train(Species~., data=training, method="extraTrees", trControl=fitControl)
+
+# training results
+rfFit1
+
+# -------------------
 # Max Kuhn's webinar
 # -------------------
 
@@ -87,6 +112,7 @@ churnTest  <- allData[-inTrainingSet,]
 # createFolds, createMultiFolds, createResamples
 
 # preProcess calcuates values that can be used to apply to any data set
+preProcess <- (churnTrain)
 
 # Current methods: centering, scaling, ...
 

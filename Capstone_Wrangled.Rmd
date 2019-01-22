@@ -102,6 +102,7 @@ As per data dictionary, if `duration` equals 0 then customers is automatically
 not subscribed. Let's create a new feature/variable, `contacted` for results.
 ```{r}
 bankfull <- mutate(bankfull, contacted = (duration_sec != "0"))
+bankfull$contacted <- as.factor(bankfull$contacted)
 ```
 
 
@@ -115,11 +116,13 @@ table(bankfull$subscribed)
 Replace all periods ('.') with underscores ('_') for legibility.
 Also change the _missing values_ to NA.
 ```{r}
+summary(bankfull$job)
 jtemp <- bankfull$job
 bankfull$job <- gsub("\\.", "", jtemp)
 #bankfull$job[bankfull$job == "unknown"] <- NA
 bankfull$job <- as.factor(bankfull$job)
 
+summary(bankfull$edu_lvl)
 etemp <- bankfull$edu_lvl
 bankfull$edu_lvl <- gsub("\\.", "_", etemp)
 #bankfull$edu_lvl[bankfull$edu_lvl == "unknown"] <- NA
@@ -144,16 +147,16 @@ summary(bankfull)
 A cursory look at the `subscribe`variable will show most customers do not sign 
 up for the extra service.
 ```{r}
-prop.table(table(bankfull$subscribed))
 ggplot(bankfull, aes(x = subscribed)) + geom_bar() + labs(title = "How many clients subscribed?")
+print("The proportion of \'no\' to \'yes\' in a table:")
+prop.table(table(bankfull$subscribed))
 ```
 
 How many clients from the previous campaign also signed up for a term deposit 
 this time around? This should be similar to checking for a repeat customer.
 ```{r}
-#xtabs(~prev_outcome+subscribed, bankfull)
 ggplot(bankfull, aes(prev_outcome)) + geom_bar() + labs(title = "How many clients subscribed to a previous campaign?")
-#plot(xtabs(~prev_outcome+subscribed, bankfull), main="Previous Outcome vs Current Subscrption")
+xtabs(~prev_outcome+subscribed, bankfull)
 ```
 
 Unfortunately there is a large number of "nonexistent" values for `prev_outome`.
@@ -167,10 +170,17 @@ ggplot(bankfull, aes(x = subscribed, fill = prev_outcome)) +
 prop.table(table(bankfull$prev_outcome))
 ```
 
+Let's take a look at whether there is any correlation with client data.
 ```{r}
+library(summarytools)
+
+ggplot(bankfull, aes(x = age, fill = subscribed)) + 
+  geom_bar() + 
+  labs(title = "Which age group tends to subscribe?")
+
 ggplot(bankfull, aes(x = edu_lvl, fill = subscribed)) + 
   geom_bar() + 
-  theme(axis.text.x = element_text(angle = 90)) +
+  theme(axis.text.x = element_text(angle = 45)) +
   labs(title = "Which educational level tends to subscribe?")
 
 ggplot(bankfull, aes(x = job, fill = subscribed)) + 
@@ -232,7 +242,7 @@ realistic predictive model.
 ```{r}
 bankfull <- bankfull %>% mutate(duration_min = duration_sec/60)
 summary(bankfull$duration_min)
-boxplot(bankfull$duration_min)
+#boxplot(bankfull$duration_min)
 ggplot(bankfull, aes(x=duration_min, y=subscribed)) + geom_boxplot()
 ```
 
@@ -278,8 +288,9 @@ test = `r reject_cnt + 20`
 How did a previous campaign perform?
 
 ```{r}
-
-ggplot(bankfull, aes(x = prev_outcome)) + geom_bar()
+dummyModel <- dummyVars(subscribed~.,data=bankfull)
+trainData_mat <- predict(dummyModel, newdata = trainData)
+trainData <- data.frame(trainData_mat)
 ```
 
 _Posit questions as they come up from observations_

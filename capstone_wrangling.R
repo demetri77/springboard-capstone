@@ -118,15 +118,57 @@ ggplot(edu_tmp, aes(x = edu_lvl)) + geom_bar()
 model <- glm(subscribed ~ ., data = bankfull, family = binomial)
 summary(model)
 
+ggplot(bankfull, aes(x = age, fill = subscribed)) + 
+  geom_histogram(binwidth = 10) + 
+  labs(title = "Age distrubtion of current bank clients and those who subscribed") 
+
+library(scales)
+ggplot(bankfull, aes(x = age, fill = subscribed)) + 
+  geom_histogram(binwidth = 10, aes(y=(..count../sum(..count..)))) + 
+  scale_y_continuous(scale::percent) +
+  labs(title = "Age distrubtion of current bank clients and those who subscribed") 
+
+ggplot(bankfull), aes(job, fill=subscribed)) + 
+  geom_bar(aes(y = (..count..)/sum(..count..))) + 
+  scale_y_continuous(labels=scales::percent) +
+  ylab("relative frequencies")
+
+# ------------------------------
+# ggpairs
+# ------------------------------
+library(GGally)
+
+#b_client <- bankfull[, c(1:7)]
+b_client <- select(bankfull, age:loan)
+b_credit <- bankfull[, c("default", "housing", "loan")]
+b_credit <- bankfull[, c("cred_default", "mortgage", "loan")]
+b_contact
+b_soceco <- select(bankfull, emp.var.rate:euribor3m)
+
+ggpairs(b_client)
+ggpairs(b_credit)
+ggpairs(b_soceco)
 
 # ------------------------------
 # summarytools
 # ------------------------------
 library(summarytools)
-# freq()
-# ctable()
-# descr()
-# dfsummary()
+
+# Data Frame Summaries
+dfSummary(bankfull, plain.ascii=FALSE, style="grid")
+
+dfSummary(b_client)
+
+# Frequency
+freq(bankfull$age)
+freq(bankfull$loan)
+
+# Cross-Tabulation
+ctable(bankfull$edu_lvl, bankfull$subscribed)
+ctable(bankfull$job, bankfull$subscribed)
+
+# Descriptive Univariate Stats
+descr(bankfull)
 
 # Write/Export dataset
 write_csv(bankfull, path="bankfull_clean.csv")
