@@ -112,8 +112,38 @@ churnTest  <- allData[-inTrainingSet,]
 # createFolds, createMultiFolds, createResamples
 
 # preProcess calcuates values that can be used to apply to any data set
-preProcess <- (churnTrain)
+preProcess_data <- preProcess(churnTrain)
 
 # Current methods: centering, scaling, ...
 
 numerics <- c("account_length", "total_day_calls")
+
+# ---------------------
+# ML Mastery
+# ---------------------
+library(caret)
+data(iris)
+original <- iris[,1:4]
+#summary(original)
+
+# center: subtract mean from values
+preprocess_center <- preProcess(original, method=c("center"))
+
+# scale: divide values by stdev
+preprocess_scale <- preProcess(original, method=c("scale"))
+#print(preprocessParams)
+
+# range: normalized
+preprocess_range <- preProcess(original, method=c("range"))
+
+transformedC <- predict(preprocess_center, original)
+transformedS <- predict(preprocess_scale, original)
+transformedR <- predict(preprocess_range, original)
+#summary(transformed)
+
+
+
+library(GGally)
+ggpairs(original)
+ggpairs(transformedC)
+ggpairs(transformedS)

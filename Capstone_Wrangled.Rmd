@@ -119,14 +119,14 @@ Also change the _missing values_ to NA.
 summary(bankfull$job)
 jtemp <- bankfull$job
 bankfull$job <- gsub("\\.", "", jtemp)
-#bankfull$job[bankfull$job == "unknown"] <- NA
 bankfull$job <- as.factor(bankfull$job)
+summary(bankfull$job)
 
 summary(bankfull$edu_lvl)
 etemp <- bankfull$edu_lvl
 bankfull$edu_lvl <- gsub("\\.", "_", etemp)
-#bankfull$edu_lvl[bankfull$edu_lvl == "unknown"] <- NA
 bankfull$edu_lvl <- as.factor(bankfull$edu_lvl)
+summary(bankfull$edu_lvl)
 ```
 
 There are only 2 possible values for the dependent variable, "subscribed". As
@@ -143,6 +143,8 @@ summary(bankfull)
 ```
 
 ### Including Plots
+
+#### Looking at Campaign results
 
 A cursory look at the `subscribe`variable will show most customers do not sign 
 up for the extra service.
@@ -161,14 +163,16 @@ xtabs(~prev_outcome+subscribed, bankfull)
 
 Unfortunately there is a large number of "nonexistent" values for `prev_outome`.
 
-**Although most of the inside sales from the previous campaign resulted in 
-failed attempts, the large number of NA results makes this feature useless.**
+**Although most of the sales from the previous campaign resulted in failed 
+attempts, the large number of NA results makes this feature useless.**
 ```{r}
 ggplot(bankfull, aes(x = subscribed, fill = prev_outcome)) + 
-  geom_bar() + 
+  geom_bar(position="fill") + 
   labs(title = "How many customers from previous campaign also bought into current subscription?")
 prop.table(table(bankfull$prev_outcome))
 ```
+
+#### Looking at Client Data
 
 Let's take a look at whether there is any correlation with client data.
 ```{r}
@@ -185,7 +189,7 @@ ggplot(bankfull, aes(x = edu_lvl, fill = subscribed)) +
 
 ggplot(bankfull, aes(x = job, fill = subscribed)) + 
   geom_bar() + 
-  theme(axis.text.x = element_text(angle = 90)) + 
+  theme(axis.text.x = element_text(angle = 45)) + 
   labs(title = "Which job tends to subscribe?")
 
 ```
@@ -243,7 +247,7 @@ realistic predictive model.
 bankfull <- bankfull %>% mutate(duration_min = duration_sec/60)
 summary(bankfull$duration_min)
 #boxplot(bankfull$duration_min)
-ggplot(bankfull, aes(x=duration_min, y=subscribed)) + geom_boxplot()
+ggplot(bankfull, aes(x=duration_min, y=subscribed)) + geom_boxplot() # coord_flip()
 ```
 
 
@@ -253,7 +257,7 @@ ggplot(bankfull, aes(x=age)) + geom_bar()
 ggplot(bankfull, aes(x=age)) + geom_histogram(binwidth = 1)
 ```
 
-```{r fig.cap = "Contact Type vs Subscribed"}
+```{r}
 #count(bankfull, vars = day_of_week)
 #ggplot(bankfull, aes(x=subscribed, fill = contact_typ)) + geom_bar()
 ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + geom_bar()
@@ -269,29 +273,6 @@ summary(bankfull$prev_outcome)
 ```
 
 
-How many of the same customers subscribed to a long-term deposit service versus those who have not?
-
-```{r}
-reject_cnt <- tally(bankfull, subscribed == "no")
-reject_pct <- reject_cnt/nrow(bankfull)*100
-accept_cnt <- tally(bankfull, subscribed == "yes")
-accept_pct <- accept_cnt/nrow(bankfull)*100
-summary(bankfull$subscribed)
-ggplot(bankfull, aes(x = subscribed)) + geom_bar()
-
-print(accept_pct)
-#print(reject_pct, "% would reject.")
-
-```
-test = `r reject_cnt + 20`
-
-How did a previous campaign perform?
-
-```{r}
-dummyModel <- dummyVars(subscribed~.,data=bankfull)
-trainData_mat <- predict(dummyModel, newdata = trainData)
-trainData <- data.frame(trainData_mat)
-```
 
 _Posit questions as they come up from observations_
 

@@ -26,7 +26,13 @@ bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "ifffffffffiiiicddd
 #bankfull_clean <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
 ```
 
+I will be treating this a supervised classification problem. While predicting 
+whether a customer will subscribe to a new service, I need to find the main 
+predictors while developing a model that best expressses a client's decision 
+for subscribing. 
+
 ## Logistic Regression
+Let's start with partitioning the dataset into a training and test set.
 ```{r}
 set.seed(13456)
 inTrain <- createDataPartition(y=bankfull_clean$subscribed, p=0.75, list=FALSE)
@@ -36,16 +42,39 @@ testData  <- bankfull_clean[-inTrain,]
 x = trainData[,]
 y = trainData$subscribed
 
+```
+
+Now to transform the data before developing a model for training. 
+```{r}
+
+# applying preProcess
 preProcess_missingdata <- preProcess(trainData, method='knnImpute')
 
+preprocessed <- preProcess(trainData, method=c("scale"))
 modelFit <- train(subscribed ~ ., data=trainData, method="glm", na.action = na.omit)
-
-predictions <- predict(modelFit, newdata=testData)
-
-confusionMatrix(predictions, testData$type)
 
 ```
 
+Now that we have a model, let's apply it to the test set.
+```{r}
+
+predictions <- predict(modelFit, newdata=testData)
+
+```
+
+Here is a confusion matrix, with the results expressing accuracy, sensitivity, 
+and specificity.
+```{r}
+confusionMatrix(predictions, testData$subscribed) # investigate further parameters (eg F1 score)
+```
+
+
+
+```{r}
+dummyModel <- dummyVars(subscribed~.,data=bankfull)
+trainData_mat <- predict(dummyModel, newdata = trainData)
+trainData <- data.frame(trainData_mat)
+```
 
 ## Random Forest
 ```{r}
