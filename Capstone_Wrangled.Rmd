@@ -31,7 +31,7 @@ housemaid, management, retired, self-employed, services, student,
 technician, unemployed, unknown)
 3. marital: marital status (categorical: divorced, married, single,
 unknown; note: 'divorced' means divorced or widowed)
-4. education: categorical (basic.4y, basic.6y, basic.9y, high.school,
+4. education: (categorical: basic.4y, basic.6y, basic.9y, high.school,
 illiterate, professional.course, university.degree, unknown)
 5. default: has credit in default? (categorical: no, yes, unknown)
 6. housing: has housing loan? (categorical: no, yes, unknown)
@@ -74,11 +74,13 @@ failure, nonexistent, success)
 
 21. y: has the client subscribed a term deposit? (binary: yes, no)
 
-**Read in the dataset with values delimited by semi-colons along with 
-designated column types as indicated by the data dictionary.**
+**Data Preparation**
+
+Let's start by reading in the dataset with values delimited by semi-colons along 
+with designated column types as indicated by the data dictionary.**
 ```{r}
-#bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
-bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "ifffffffffiiiicdddddc")
+bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "ifffffffffiiiifdddddf")
+summary(bankfull)
 ```
 
 Let's rename variables to be more descriptive and avoid use of periods (".")
@@ -105,16 +107,13 @@ bankfull <- mutate(bankfull, contacted = (duration_sec != "0"))
 bankfull$contacted <- as.factor(bankfull$contacted)
 ```
 
-
 The goal is to determine which factors lead to a subscription so I'll rename 
 the dependent variable to `subscribed`, which is more descriptive than just `y`.
 ```{r}
 bankfull <- rename(bankfull, subscribed = y)
-table(bankfull$subscribed)
 ```
 
 Replace all periods ('.') with underscores ('_') for legibility.
-Also change the _missing values_ to NA.
 ```{r}
 summary(bankfull$job)
 jtemp <- bankfull$job
@@ -129,20 +128,12 @@ bankfull$edu_lvl <- as.factor(bankfull$edu_lvl)
 summary(bankfull$edu_lvl)
 ```
 
-There are only 2 possible values for the dependent variable, "subscribed". As
-such I'll convert the variable to type factor.
-```{r}
-bankfull$subscribed <- as.factor(bankfull$subscribed)
-```
-
-
 Take a quick check of the dataset with summary and glimpse.
 ```{r}
 glimpse(bankfull)
-summary(bankfull)
 ```
 
-### Including Plots
+### Explorating Data with Plots
 
 #### Looking at Campaign results
 
@@ -150,7 +141,10 @@ A cursory look at the `subscribe`variable will show most customers do not sign
 up for the extra service.
 ```{r}
 ggplot(bankfull, aes(x = subscribed)) + geom_bar() + labs(title = "How many clients subscribed?")
-print("The proportion of \'no\' to \'yes\' in a table:")
+```
+
+The proportion of `no` to `yes` in a table:
+```{r}
 prop.table(table(bankfull$subscribed))
 ```
 
@@ -164,7 +158,7 @@ xtabs(~prev_outcome+subscribed, bankfull)
 Unfortunately there is a large number of "nonexistent" values for `prev_outome`.
 
 **Although most of the sales from the previous campaign resulted in failed 
-attempts, the large number of NA results makes this feature useless.**
+attempts, the larger number of NA results makes this variable useless.**
 ```{r}
 ggplot(bankfull, aes(x = subscribed, fill = prev_outcome)) + 
   geom_bar(position="fill") + 
@@ -202,6 +196,7 @@ ggplot(bankfull, aes(x = subscribed, fill = cred_default)) +
   geom_bar() + 
   labs(title = "Do customers with credit in default tend to describe?")
 
+# -- Swap the x and fill fields -- #
 ggplot(bankfull, aes(x = subscribed, fill = mortgage)) + 
   geom_bar() + 
   labs(title = "Do customers with a mortgage tend to subscribe?")
@@ -211,28 +206,12 @@ ggplot(bankfull, aes(x = subscribed, fill = loan)) +
   labs(title = "Do customers with a personal loan tend to subscribe?")
 
 ggplot(bankfull, aes(x = mortgage, fill = subscribed)) + 
-  geom_bar() + 
-  facet_wrap(~loan)
+  geom_bar() + facet_wrap(~loan)
 
 ```
 
 _It seems those with defaults on credit or personal loans are not lightly to 
 subscribe but those with a housing loan may subscribe._
-
-**Let's look at the age of our customers**
-
-```{r}
-ggplot(bankfull, aes(x = age, fill = subscribed)) + 
-  geom_histogram(binwidth = 10) + 
-  labs(title = "Age distrubtion of current bank clients and those who subscribed") 
-```
-
-```{r}
-ggplot(bankfull, aes(x = subscribed, y = age)) + 
-  geom_boxplot() + 
-  labs(title = "Subscription rates by age")
-```
-
 
 
 The variable _duration_ refers to the length of time the customer was last 
@@ -247,7 +226,8 @@ realistic predictive model.
 bankfull <- bankfull %>% mutate(duration_min = duration_sec/60)
 summary(bankfull$duration_min)
 #boxplot(bankfull$duration_min)
-ggplot(bankfull, aes(x=duration_min, y=subscribed)) + geom_boxplot() # coord_flip()
+ggplot(bankfull, aes(x=duration_min, y=subscribed)) + geom_boxplot() + coord_flip()
+ggplot(bankfull, aes(x=subscribed, y=duration_min)) + geom_boxplot() # coord_flip()
 ```
 
 

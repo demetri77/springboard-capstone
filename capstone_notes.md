@@ -128,3 +128,75 @@ e1071, caret, doSNOW, ipred, and xgboost
   * loan_data_replace <- loan_data
   * loan_data_replace$emp_length[index_NA] <- median(loan_data$emp_length, na.rm = TRUE)
 * Keep NA
+* extra column to mark imputed/non-imputed
+
+completeCase
+
+*log_model <- glm(subscribed~., data=bankfull_clean, family="binomial")*
+
+*Dealing with the disparity of dependent variable; 95% no vs 5% yes*
+sub-sample
+
+**REMOVED** Let's take care of _missing values_ as necessary
+```{r}
+bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
+
+There are only 2 possible values for the dependent variable, "subscribed". As
+such I'll convert the variable to type factor.
+```{r}
+bankfull$subscribed <- as.factor(bankfull$subscribed)
+```
+
+bankfull$marital[bankfull$marital == "unknown"] <- NA
+bankfull$marital <- as.factor(bankfull$marital)
+
+bankfull$cred_default[bankfull$cred_default == "unknown"] <- NA
+bankfull$cred_default <- as.factor(bankfull$cred_default)
+
+bankfull$housing[bankfull$housing == "unknown"] <- NA
+bankfull$housing <- as.factor(bankfull$housing)
+
+bankfull$prev_outcome[bankfull$prev_outcome == "nonexistent"] <- NA
+bankfull$prev_outcome <- as.factor(bankfull$prev_outcome)
+```
+
+When tabling the results we immediately see most customers will reject the 
+subscription offer.
+```{r}
+table(bankfull$subscribed)
+```
+
+
+anyNA
+bankfull_clean %>% map_lgl(anyNA)
+`purrr::map_lgl()`
+
+str_detect(string, pattern)
+
+Questions
+not sure why write_csv(bankfull, path=bankfull_clean) failed to capture an update df
+
+geom_boxplot
+
+# ggpairs
+# change the level order for subscribed yes/no 
+
+preProcess used to: scale, standardize, normalize
+methods
+
+* scale - remove anomalies; divide values by st-dev
+* center - used to standardize; subtract mean from values
+* range - used to normalize; normalize values
+
+*Steps*
+
+1. createDataPartition
+2. preprocess
+3. train
+4. predict - used to apply model
+5. confusionMatrix
+
+
+not extremely sensitive to scaling: logistic regression and rdm forest
+
+reminder: preProcess on both training & testing

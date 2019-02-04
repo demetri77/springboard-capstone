@@ -128,7 +128,7 @@ ggplot(bankfull, aes(x = age, fill = subscribed)) +
   scale_y_continuous(scale::percent) +
   labs(title = "Age distrubtion of current bank clients and those who subscribed") 
 
-ggplot(bankfull), aes(job, fill=subscribed)) + 
+ggplot(bankfull, aes(job, fill=subscribed)) + 
   geom_bar(aes(y = (..count..)/sum(..count..))) + 
   scale_y_continuous(labels=scales::percent) +
   ylab("relative frequencies")
@@ -138,15 +138,15 @@ ggplot(bankfull), aes(job, fill=subscribed)) +
 # ------------------------------
 library(GGally)
 
-#b_client <- bankfull[, c(1:7)]
+b_client <- bankfull[, c(1:7)]
 b_client <- select(bankfull, age:loan)
+ggpairs(b_client)
+
 b_credit <- bankfull[, c("default", "housing", "loan")]
 b_credit <- bankfull[, c("cred_default", "mortgage", "loan")]
-b_contact
-b_soceco <- select(bankfull, emp.var.rate:euribor3m)
-
-ggpairs(b_client)
 ggpairs(b_credit)
+
+b_soceco <- select(bankfull, emp_var_rate:euribor3m)
 ggpairs(b_soceco)
 
 # ------------------------------
