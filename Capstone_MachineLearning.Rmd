@@ -48,9 +48,10 @@ Now to transform the data before developing a model for training.
 ```{r}
 
 # applying preProcess
-preProcess_missingdata <- preProcess(trainData, method='knnImpute')
+#preProcess_missingdata <- preProcess(trainData, method='knnImpute')
+#preprocessed <- preProcess(trainData, method=c("scale"))
 
-preprocessed <- preProcess(trainData, method=c("scale"))
+# develop a model
 modelFit <- train(subscribed ~ ., data=trainData, method="glm", na.action = na.omit)
 
 ```
@@ -71,7 +72,7 @@ confusionMatrix(predictions, testData$subscribed) # investigate further paramete
 
 
 ```{r}
-dummyModel <- dummyVars(subscribed~.,data=bankfull)
+dummyModel <- dummyVars(subscribed~.,data=bankfull_clean)
 trainData_mat <- predict(dummyModel, newdata = trainData)
 trainData <- data.frame(trainData_mat)
 ```
@@ -81,7 +82,7 @@ trainData <- data.frame(trainData_mat)
 library(randomForest)
 n <- nrow(bankfull_clean)
 
-rf.train.1 <- bankfull_clean[1:n, c("age", "education")]
+rf.train.1 <- bankfull_clean[1:n, c("age", "edu_lvl")]
 rf.label <- as.factor(bankfull_clean$subscribed)
 
 set.seed(1234)

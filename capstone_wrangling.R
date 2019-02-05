@@ -146,6 +146,7 @@ b_credit <- bankfull[, c("default", "housing", "loan")]
 b_credit <- bankfull[, c("cred_default", "mortgage", "loan")]
 ggpairs(b_credit)
 
+b_soceco <- select(bankfull, emp.var.rate:euribor3m)
 b_soceco <- select(bankfull, emp_var_rate:euribor3m)
 ggpairs(b_soceco)
 

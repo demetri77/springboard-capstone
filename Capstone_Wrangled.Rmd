@@ -46,7 +46,7 @@ illiterate, professional.course, university.degree, unknown)
 thu, fri)
 11. duration: last contact duration, in seconds (numeric). 
 Important note: this attribute highly affects the output target (e.g., if 
-duration=0 then y='no). Yet, the duration is not known before a call is 
+duration=0 then y='no'). Yet, the duration is not known before a call is 
 performed. Also, after the end of the call y is obviously known. Thus, this 
 input should only be included for benchmark purposes and should be discarded 
 if the intention is to have a realistic predictive model.
@@ -192,16 +192,16 @@ ggplot(bankfull, aes(x = job, fill = subscribed)) +
 **Checking elsewhere, is there any positive correlation between those who 
 `subscribe` and have a default on credit, mortgage, or a personal loan?** 
 ```{r}
-ggplot(bankfull, aes(x = subscribed, fill = cred_default)) + 
+ggplot(bankfull, aes(x = cred_default, fill = subscribed)) + 
   geom_bar() + 
   labs(title = "Do customers with credit in default tend to describe?")
 
 # -- Swap the x and fill fields -- #
-ggplot(bankfull, aes(x = subscribed, fill = mortgage)) + 
+ggplot(bankfull, aes(x = mortgage, fill = subscribed)) + 
   geom_bar() + 
   labs(title = "Do customers with a mortgage tend to subscribe?")
 
-ggplot(bankfull, aes(x = subscribed, fill = loan)) + 
+ggplot(bankfull, aes(x = loan, fill = subscribed)) + 
   geom_bar() + 
   labs(title = "Do customers with a personal loan tend to subscribe?")
 
@@ -225,8 +225,8 @@ realistic predictive model.
 ```{r}
 bankfull <- bankfull %>% mutate(duration_min = duration_sec/60)
 summary(bankfull$duration_min)
-#boxplot(bankfull$duration_min)
-ggplot(bankfull, aes(x=duration_min, y=subscribed)) + geom_boxplot() + coord_flip()
+#ggplot(bankfull, aes(x=duration_min, y=subscribed)) + geom_boxplot() + coord_flip()
+ggplot(bankfull, aes(x=duration_min, fill=subscribed)) + geom_bar()
 ggplot(bankfull, aes(x=subscribed, y=duration_min)) + geom_boxplot() # coord_flip()
 ```
 
@@ -237,22 +237,15 @@ ggplot(bankfull, aes(x=age)) + geom_bar()
 ggplot(bankfull, aes(x=age)) + geom_histogram(binwidth = 1)
 ```
 
+It appears customers are more inclined to subscribe when contacted via 
+telephone compared to mobile phone.
 ```{r}
-#count(bankfull, vars = day_of_week)
 #ggplot(bankfull, aes(x=subscribed, fill = contact_typ)) + geom_bar()
-ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + geom_bar()
+ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + geom_bar(position="fill") + 
+  labs(title="Contact by Cellular or Telephone")
 #try geom_col()
-count(bankfull)
+table(bankfull$contact_typ)
 ```
-
-Outcome of previous campaign
-
-```{r}
-ggplot(bankfull, aes(x = prev_outcome)) + geom_bar()
-summary(bankfull$prev_outcome)
-```
-
-
 
 _Posit questions as they come up from observations_
 
@@ -260,7 +253,19 @@ _Posit questions as they come up from observations_
 2. Can you find some trends (high, low, increase, decrease, anomalies)?
 3. Can you make a bar plot or a histogram?
 4. Can you compare two related quantities?
+```{r}
+ggplot(bankfull, aes(y=emp_var_rate)) + geom_boxplot()
+ggplot(bankfull, aes(y=euribor3m)) + geom_boxplot()
+```
+
 5. Can you make a scatterplot?
+```{r}
+ggplot(bankfull, aes(x=emp_var_rate, y=euribor3m)) + 
+  geom_point(aes(colour = factor(subscribed)), alpha = 0.50) + 
+  labs(title = "Euribor (3 months) vs Employment Variation Rate (quarterly)")
+
+```
+
 6. Can you make a time-series plot?
 
 Write the revised dataset into a cleaned-up file.
