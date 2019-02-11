@@ -166,7 +166,7 @@ freq(bankfull$loan)
 
 # Cross-Tabulation
 ctable(bankfull$edu_lvl, bankfull$subscribed)
-ctable(bankfull$job, bankfull$subscribed)
+ctable(bankfull$job, bankfull$y)
 
 # Descriptive Univariate Stats
 descr(bankfull)

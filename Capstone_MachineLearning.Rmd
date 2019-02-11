@@ -23,7 +23,6 @@ banking services.
 
 ```{r}
 bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "ifffffffffiiiicdddddffd")
-#bankfull_clean <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
 ```
 
 I will be treating this a supervised classification problem. While predicting 
@@ -31,7 +30,10 @@ whether a customer will subscribe to a new service, I need to find the main
 predictors while developing a model that best expressses a client's decision 
 for subscribing. 
 
-## Logistic Regression
+## Set Up Model Parameters
+
+caret::trainControl(method = "cv", number = 2, classProbs = TRUE)
+
 Let's start with partitioning the dataset into a training and test set.
 ```{r}
 set.seed(13456)
@@ -44,7 +46,9 @@ y = trainData$subscribed
 
 ```
 
-Now to transform the data before developing a model for training. 
+## Logistic Regression with CARET
+
+Transform the data before developing a model for training. 
 ```{r}
 
 # applying preProcess
@@ -52,32 +56,48 @@ Now to transform the data before developing a model for training.
 #preprocessed <- preProcess(trainData, method=c("scale"))
 
 # develop a model
-modelFit <- train(subscribed ~ ., data=trainData, method="glm", na.action = na.omit)
+modelFit <- train(subscribed ~ ., data=trainData, method="glm", na.action=na.omit)
 
 ```
 
 Now that we have a model, let's apply it to the test set.
 ```{r}
 
-predictions <- predict(modelFit, newdata=testData)
-
+glm_prediction <- predict(modelFit, newdata=testData)
 ```
 
 Here is a confusion matrix, with the results expressing accuracy, sensitivity, 
 and specificity.
 ```{r}
-confusionMatrix(predictions, testData$subscribed) # investigate further parameters (eg F1 score)
+confMatrix <- caret::confusionMatrix(predictions, testData$subscribed, mode="everything") 
+#confMatrix
+
+# use metric parameter; F1 or Kappa
+
+# investigate further parameters (eg F1/accuracy score)
+# Precision = TP / (TP + FP)
+# Recall = TP / (TP + FN)
+# F1 = (1+beta^2)*precision*recall/((beta^2 * precision)+recall)
+# confMatrix$byClass["F1"]
+
 ```
 
 
 
 ```{r}
-dummyModel <- dummyVars(subscribed~.,data=bankfull_clean)
-trainData_mat <- predict(dummyModel, newdata = trainData)
-trainData <- data.frame(trainData_mat)
+#dummyModel <- dummyVars(subscribed~.,data=bankfull_clean)
+#trainData_mat <- predict(dummyModel, newdata = trainData)
+#trainData <- data.frame(trainData_mat)
 ```
 
-## Random Forest
+## Random Forest with CARET
+```{r}
+# play with smaller # of rf while playing/testing
+rf_model <- caret::train(subscribed~., data=trainData, method="rf")
+
+rf_model
+#rf_prediction <- predict(_modelFit_, newdata=testData)
+```
 ```{r}
 library(randomForest)
 n <- nrow(bankfull_clean)
@@ -90,8 +110,5 @@ rf.1 <- randomForest(x=rf.train.1, y=rf.label, importance=TRUE, ntree=500)
 rf.1
 
 varImpPlot(rf.1)
-
-rf_model <- caret::train(subscribed~., data=bankfull_clean, method="rf")
-
 ```
 

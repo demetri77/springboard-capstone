@@ -8,10 +8,11 @@ output: html_document
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(ggplot2)
+library(GGally)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Trying to predict the success of bank telemarketing
+## Working to predict the success of bank telemarketing
 
 I'm working on predicting the success of telemarketing calls for a bank that's 
 selling long-term deposits. A Portuguese retail bank was addressed, with data 
@@ -74,16 +75,16 @@ failure, nonexistent, success)
 
 21. y: has the client subscribed a term deposit? (binary: yes, no)
 
-**Data Preparation**
+### Data Preparation
 
 Let's start by reading in the dataset with values delimited by semi-colons along 
-with designated column types as indicated by the data dictionary.**
+with designated column types as indicated by the data dictionary.
 ```{r}
 bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "ifffffffffiiiifdddddf")
 summary(bankfull)
 ```
 
-Let's rename variables to be more descriptive and avoid use of periods (".")
+Let's rename variables to be more descriptive and avoid use of periods.
 ```{r}
 bankfull <- rename(bankfull, edu_lvl = "education")
 bankfull <- rename(bankfull, cred_default = "default")
@@ -100,6 +101,12 @@ bankfull <- rename(bankfull, cons_conf_idx = "cons.conf.idx")
 bankfull <- rename(bankfull, num_employed = "nr.employed")
 ```
 
+The goal is to determine which factors lead to a subscription so I'll rename 
+the dependent variable to `subscribed`, which is more descriptive than just `y`.
+```{r}
+bankfull <- rename(bankfull, subscribed = y)
+```
+
 As per data dictionary, if `duration` equals 0 then customers is automatically 
 not subscribed. Let's create a new feature/variable, `contacted` for results.
 ```{r}
@@ -107,35 +114,29 @@ bankfull <- mutate(bankfull, contacted = (duration_sec != "0"))
 bankfull$contacted <- as.factor(bankfull$contacted)
 ```
 
-The goal is to determine which factors lead to a subscription so I'll rename 
-the dependent variable to `subscribed`, which is more descriptive than just `y`.
+Replace all periods ('.') in values with underscores ('_') for legibility.
 ```{r}
-bankfull <- rename(bankfull, subscribed = y)
-```
-
-Replace all periods ('.') with underscores ('_') for legibility.
-```{r}
-summary(bankfull$job)
+summary(bankfull$job) # job types before replacement 
 jtemp <- bankfull$job
 bankfull$job <- gsub("\\.", "", jtemp)
 bankfull$job <- as.factor(bankfull$job)
-summary(bankfull$job)
+summary(bankfull$job) # job types after replacement
 
-summary(bankfull$edu_lvl)
+summary(bankfull$edu_lvl) # education levels before replacement
 etemp <- bankfull$edu_lvl
 bankfull$edu_lvl <- gsub("\\.", "_", etemp)
 bankfull$edu_lvl <- as.factor(bankfull$edu_lvl)
-summary(bankfull$edu_lvl)
+summary(bankfull$edu_lvl) # education levels after replacement
 ```
 
-Take a quick check of the dataset with summary and glimpse.
+Take a quick check of the dataset with glimpse.
 ```{r}
 glimpse(bankfull)
 ```
 
 ### Explorating Data with Plots
 
-#### Looking at Campaign results
+**Looking at Campaign results**
 
 A cursory look at the `subscribe`variable will show most customers do not sign 
 up for the extra service.
@@ -157,8 +158,8 @@ xtabs(~prev_outcome+subscribed, bankfull)
 
 Unfortunately there is a large number of "nonexistent" values for `prev_outome`.
 
-**Although most of the sales from the previous campaign resulted in failed 
-attempts, the larger number of NA results makes this variable useless.**
+_Although most of the sales from the previous campaign resulted in failed 
+attempts, the larger number of NA results makes this variable useless._
 ```{r}
 ggplot(bankfull, aes(x = subscribed, fill = prev_outcome)) + 
   geom_bar(position="fill") + 
@@ -166,7 +167,7 @@ ggplot(bankfull, aes(x = subscribed, fill = prev_outcome)) +
 prop.table(table(bankfull$prev_outcome))
 ```
 
-#### Looking at Client Data
+**Looking at Client Data**
 
 Let's take a look at whether there is any correlation with client data.
 ```{r}
@@ -188,9 +189,15 @@ ggplot(bankfull, aes(x = job, fill = subscribed)) +
 
 ```
 
+Density of Customer Age
+```{r}
+plot(density(bankfull$age), main="Density of Customer Age")
+ggplot(bankfull, aes(x=age)) + geom_bar()
+ggplot(bankfull, aes(x=age)) + geom_histogram(binwidth = 1)
+```
 
-**Checking elsewhere, is there any positive correlation between those who 
-`subscribe` and have a default on credit, mortgage, or a personal loan?** 
+Checking elsewhere, is there any positive correlation between those who 
+`subscribe` and have a default on credit, mortgage, or a personal loan?
 ```{r}
 ggplot(bankfull, aes(x = cred_default, fill = subscribed)) + 
   geom_bar() + 
@@ -213,6 +220,7 @@ ggplot(bankfull, aes(x = mortgage, fill = subscribed)) +
 _It seems those with defaults on credit or personal loans are not lightly to 
 subscribe but those with a housing loan may subscribe._
 
+**Last Contact Data**
 
 The variable _duration_ refers to the length of time the customer was last 
 contacted, in seconds. Important note:  this attribute highly affects the 
@@ -230,13 +238,6 @@ ggplot(bankfull, aes(x=duration_min, fill=subscribed)) + geom_bar()
 ggplot(bankfull, aes(x=subscribed, y=duration_min)) + geom_boxplot() # coord_flip()
 ```
 
-
-```{r}
-plot(density(bankfull$age), main="Density of Customer Age")
-ggplot(bankfull, aes(x=age)) + geom_bar()
-ggplot(bankfull, aes(x=age)) + geom_histogram(binwidth = 1)
-```
-
 It appears customers are more inclined to subscribe when contacted via 
 telephone compared to mobile phone.
 ```{r}
@@ -246,6 +247,46 @@ ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + geom_bar(position="fil
 #try geom_col()
 table(bankfull$contact_typ)
 ```
+
+A regular bar graph by count makes it difficult to determine which month a 
+client is most likely to subscribe. At best it looks like *May* has the most 
+subscribers, but that doesn't mean it's the most likely.
+```{r}
+ggplot(bankfull, aes(x=month, fill=subscribed)) + geom_bar()
+```
+
+But if we stack each month as relative proportions we can see customers are more receptive to subscribing in *March* followed by *December* before *September*.
+```{r}
+ggplot(bankfull, aes(x=month, fill=subscribed)) + geom_bar(position="fill")
+```
+
+Updated to include weekdays and we see the second column, *Wednesday*, becomes a good day to subscribe.
+```{r}
+ggplot(bankfull, aes(x=day_of_week, fill=subscribed)) + 
+  geom_bar(position="fill") +
+  facet_wrap(vars(month))
+```
+
+The most subscriptions actually happen in *May* and other summer months, 
+*June, July, and August*.
+```{r}
+
+freq(bankfull %>% filter(subscribed == "yes") %>% select(month))
+
+```
+
+
+**Socioeconomic Data**
+
+There looks to be a high correlation in the following 2 pairs:
+
+* euribor3m vs employment variation rate
+* euribor3m vs number employed at bank 
+```{r}
+b_soceco <- select(bankfull, emp_var_rate:num_employed)
+ggpairs(b_soceco)
+```
+
 
 _Posit questions as they come up from observations_
 
