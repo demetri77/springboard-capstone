@@ -133,6 +133,11 @@ ggplot(bankfull, aes(job, fill=subscribed)) +
   scale_y_continuous(labels=scales::percent) +
   ylab("relative frequencies")
 
+ggplot(bankfull, aes(euribor3m, emp_var_rate)) + geom_boxplot()
+ggplot(bankfull, aes(day_of_week, )) + geom_boxplot()
+
+ggplot(bankfull, aes(x=prev_outcome, y=(duration_sec/60)) + geom_boxplot()
+
 # ------------------------------
 # ggpairs
 # ------------------------------

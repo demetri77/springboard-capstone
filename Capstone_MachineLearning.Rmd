@@ -48,10 +48,10 @@ y = trainData$subscribed
 
 ## Logistic Regression with CARET
 
-Transform the data before developing a model for training. 
+Develop a model for training data. 
 ```{r}
 
-# applying preProcess
+# applying preProcess to scale/standardize/normalize
 #preProcess_missingdata <- preProcess(trainData, method='knnImpute')
 #preprocessed <- preProcess(trainData, method=c("scale"))
 
@@ -60,7 +60,13 @@ modelFit <- train(subscribed ~ ., data=trainData, method="glm", na.action=na.omi
 
 ```
 
-Now that we have a model, let's apply it to the test set.
+What can we conclude from the logistic regression model? 
+```{r}
+summary(modelFit)
+```
+
+
+Let's apply our model to the test set.
 ```{r}
 
 glm_prediction <- predict(modelFit, newdata=testData)
@@ -69,7 +75,7 @@ glm_prediction <- predict(modelFit, newdata=testData)
 Here is a confusion matrix, with the results expressing accuracy, sensitivity, 
 and specificity.
 ```{r}
-confMatrix <- caret::confusionMatrix(predictions, testData$subscribed, mode="everything") 
+confMatrix <- caret::confusionMatrix(glm_prediction, testData$subscribed, mode="everything") 
 #confMatrix
 
 # use metric parameter; F1 or Kappa
@@ -93,22 +99,11 @@ confMatrix <- caret::confusionMatrix(predictions, testData$subscribed, mode="eve
 ## Random Forest with CARET
 ```{r}
 # play with smaller # of rf while playing/testing
-rf_model <- caret::train(subscribed~., data=trainData, method="rf")
+rf_model <- caret::train(subscribed~., data=trainData, method="rf",
+                         trControl=trainControl(method="cv", number=5))
 
 rf_model
 #rf_prediction <- predict(_modelFit_, newdata=testData)
 ```
-```{r}
-library(randomForest)
-n <- nrow(bankfull_clean)
 
-rf.train.1 <- bankfull_clean[1:n, c("age", "edu_lvl")]
-rf.label <- as.factor(bankfull_clean$subscribed)
-
-set.seed(1234)
-rf.1 <- randomForest(x=rf.train.1, y=rf.label, importance=TRUE, ntree=500)
-rf.1
-
-varImpPlot(rf.1)
-```
 

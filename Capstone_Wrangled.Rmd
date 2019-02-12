@@ -9,6 +9,7 @@ output: html_document
 library(tidyverse)
 library(ggplot2)
 library(GGally)
+library(summarytools)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
@@ -171,7 +172,6 @@ prop.table(table(bankfull$prev_outcome))
 
 Let's take a look at whether there is any correlation with client data.
 ```{r}
-library(summarytools)
 
 ggplot(bankfull, aes(x = age, fill = subscribed)) + 
   geom_bar() + 
@@ -179,7 +179,7 @@ ggplot(bankfull, aes(x = age, fill = subscribed)) +
 
 ggplot(bankfull, aes(x = edu_lvl, fill = subscribed)) + 
   geom_bar() + 
-  theme(axis.text.x = element_text(angle = 45)) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
   labs(title = "Which educational level tends to subscribe?")
 
 ggplot(bankfull, aes(x = job, fill = subscribed)) + 
@@ -200,20 +200,19 @@ Checking elsewhere, is there any positive correlation between those who
 `subscribe` and have a default on credit, mortgage, or a personal loan?
 ```{r}
 ggplot(bankfull, aes(x = cred_default, fill = subscribed)) + 
-  geom_bar() + 
+  geom_bar(position="fill") + 
   labs(title = "Do customers with credit in default tend to describe?")
 
 # -- Swap the x and fill fields -- #
 ggplot(bankfull, aes(x = mortgage, fill = subscribed)) + 
-  geom_bar() + 
+  geom_bar(position="fill") + 
   labs(title = "Do customers with a mortgage tend to subscribe?")
 
 ggplot(bankfull, aes(x = loan, fill = subscribed)) + 
-  geom_bar() + 
+  geom_bar(position="fill") + 
   labs(title = "Do customers with a personal loan tend to subscribe?")
 
-ggplot(bankfull, aes(x = mortgage, fill = subscribed)) + 
-  geom_bar() + facet_wrap(~loan)
+#ggplot(bankfull, aes(x = mortgage, fill = subscribed)) + geom_bar(position = "fill") + facet_wrap(~loan)
 
 ```
 
@@ -233,16 +232,17 @@ realistic predictive model.
 ```{r}
 bankfull <- bankfull %>% mutate(duration_min = duration_sec/60)
 summary(bankfull$duration_min)
-#ggplot(bankfull, aes(x=duration_min, y=subscribed)) + geom_boxplot() + coord_flip()
 ggplot(bankfull, aes(x=duration_min, fill=subscribed)) + geom_bar()
-ggplot(bankfull, aes(x=subscribed, y=duration_min)) + geom_boxplot() # coord_flip()
+ggplot(bankfull, aes(x=subscribed, y=duration_min)) + geom_boxplot()
+ggplot(bankfull, aes(x=subscribed, y=duration_min)) + geom_boxplot() + coord_flip()
 ```
 
 It appears customers are more inclined to subscribe when contacted via 
-telephone compared to mobile phone.
+cellular compared to telephone.
 ```{r}
-#ggplot(bankfull, aes(x=subscribed, fill = contact_typ)) + geom_bar()
-ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + geom_bar(position="fill") + 
+ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + geom_bar()
+ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + 
+  geom_bar(position="fill") + 
   labs(title="Contact by Cellular or Telephone")
 #try geom_col()
 table(bankfull$contact_typ)
@@ -285,6 +285,11 @@ There looks to be a high correlation in the following 2 pairs:
 ```{r}
 b_soceco <- select(bankfull, emp_var_rate:num_employed)
 ggpairs(b_soceco)
+```
+
+```{r}
+ggplot(bankfull, aes(emp_var_rate, euribor3m)) + geom_col()
+ggplot(bankfull, aes(num_employed, euribor3m)) + geom_col()
 ```
 
 
