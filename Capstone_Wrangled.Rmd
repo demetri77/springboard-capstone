@@ -13,12 +13,12 @@ library(summarytools)
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Working to predict the success of bank telemarketing
+## Working to predict the success of bank marketing
 
 I'm working on predicting the success of telemarketing calls for a bank that's 
 selling long-term deposits. A Portuguese retail bank was addressed, with data 
 collected from 2008 to 2013, thus including the effects of the recent 
-financial crisis of 2008. With 21 features available for analysis, I hope to 
+financial crisis of 2008. With 21 variables available for analysis, I hope to 
 derive knowledge for a model that would confirm how to better focus resources 
 towards clients with a high chance of agreeing to registering for extra 
 banking services. 
@@ -80,7 +80,7 @@ failure, nonexistent, success)
 
 Let's start by reading in the dataset with values delimited by semi-colons along 
 with designated column types as indicated by the data dictionary.
-```{r}
+```{r Data_Prep}
 bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "ifffffffffiiiifdddddf")
 summary(bankfull)
 ```
@@ -109,7 +109,7 @@ bankfull <- rename(bankfull, subscribed = y)
 ```
 
 As per data dictionary, if `duration` equals 0 then customers is automatically 
-not subscribed. Let's create a new feature/variable, `contacted` for results.
+not subscribed. Let's create a new variable, `contacted` for results.
 ```{r}
 bankfull <- mutate(bankfull, contacted = (duration_sec != "0"))
 bankfull$contacted <- as.factor(bankfull$contacted)
@@ -142,7 +142,8 @@ glimpse(bankfull)
 A cursory look at the `subscribe`variable will show most customers do not sign 
 up for the extra service.
 ```{r}
-ggplot(bankfull, aes(x = subscribed)) + geom_bar() + labs(title = "How many clients subscribed?")
+ggplot(bankfull, aes(x = subscribed)) + geom_bar() + 
+  labs(title = "Subscription Counts")
 ```
 
 The proportion of `no` to `yes` in a table:
@@ -153,20 +154,35 @@ prop.table(table(bankfull$subscribed))
 How many clients from the previous campaign also signed up for a term deposit 
 this time around? This should be similar to checking for a repeat customer.
 ```{r}
-ggplot(bankfull, aes(prev_outcome)) + geom_bar() + labs(title = "How many clients subscribed to a previous campaign?")
+ggplot(bankfull, aes(prev_outcome)) + geom_bar() + 
+  labs(title="Subscription Count from a Previous Campaign")
 xtabs(~prev_outcome+subscribed, bankfull)
 ```
 
 Unfortunately there is a large number of "nonexistent" values for `prev_outome`.
 
 _Although most of the sales from the previous campaign resulted in failed 
-attempts, the larger number of NA results makes this variable useless._
+attempts, the larger number of `nonexistent` results makes this variable 
+useless._
 ```{r}
 ggplot(bankfull, aes(x = subscribed, fill = prev_outcome)) + 
   geom_bar(position="fill") + 
-  labs(title = "How many customers from previous campaign also bought into current subscription?")
+  labs(title="Proportion of subscriptions from previous campaign relative to current campaign")
+
 prop.table(table(bankfull$prev_outcome))
 ```
+
+If the `nonexistent` values were removed, more than half the clients that 
+subscribed previously will subscribe again.
+```{r}
+bankfull_prev <- filter(bankfull, prev_outcome != "nonexistent")
+ggplot(bankfull_prev, aes(x=subscribed, fill=prev_outcome)) + 
+  geom_bar(position="fill") + 
+  labs(title = "Proportion of subscriptions from previous campaign")
+
+prop.table(table(bankfull_prev$prev_outcome))
+```
+
 
 **Looking at Client Data**
 
@@ -175,17 +191,17 @@ Let's take a look at whether there is any correlation with client data.
 
 ggplot(bankfull, aes(x = age, fill = subscribed)) + 
   geom_bar() + 
-  labs(title = "Which age group tends to subscribe?")
+  labs(title = "Subscriptions per Age Group")
 
 ggplot(bankfull, aes(x = edu_lvl, fill = subscribed)) + 
   geom_bar() + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Which educational level tends to subscribe?")
+  labs(title = "Subscriptions per Education Level")
 
 ggplot(bankfull, aes(x = job, fill = subscribed)) + 
   geom_bar() + 
-  theme(axis.text.x = element_text(angle = 45)) + 
-  labs(title = "Which job tends to subscribe?")
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
+  labs(title = "Subscriptions per Job Type") # avoid using Ques in title
 
 ```
 
@@ -201,18 +217,20 @@ Checking elsewhere, is there any positive correlation between those who
 ```{r}
 ggplot(bankfull, aes(x = cred_default, fill = subscribed)) + 
   geom_bar(position="fill") + 
-  labs(title = "Do customers with credit in default tend to describe?")
+  labs(title = "Subscriptions relative to Clients who Default on Credit")
 
 # -- Swap the x and fill fields -- #
 ggplot(bankfull, aes(x = mortgage, fill = subscribed)) + 
   geom_bar(position="fill") + 
-  labs(title = "Do customers with a mortgage tend to subscribe?")
+  labs(title = "Subscriptions relative to Clients with a Mortgage")
 
 ggplot(bankfull, aes(x = loan, fill = subscribed)) + 
   geom_bar(position="fill") + 
-  labs(title = "Do customers with a personal loan tend to subscribe?")
+  labs(title = "Susbscriptions relative to Clients with an Active Loan")
 
 #ggplot(bankfull, aes(x = mortgage, fill = subscribed)) + geom_bar(position = "fill") + facet_wrap(~loan)
+
+#3 x 3 pair plot > compared with "subscribed"
 
 ```
 
@@ -233,8 +251,12 @@ realistic predictive model.
 bankfull <- bankfull %>% mutate(duration_min = duration_sec/60)
 summary(bankfull$duration_min)
 ggplot(bankfull, aes(x=duration_min, fill=subscribed)) + geom_bar()
-ggplot(bankfull, aes(x=subscribed, y=duration_min)) + geom_boxplot()
-ggplot(bankfull, aes(x=subscribed, y=duration_min)) + geom_boxplot() + coord_flip()
+
+#time_to_subscribed <- bankfull %>% filter(subscribed)
+ggplot(bankfull, aes(x=subscribed, y=duration_min)) + 
+  geom_boxplot(outlier.colour="blue", outlier.shape=6, outlier.size=2)
+ggplot(bankfull, aes(x=subscribed, y=duration_min)) + 
+  geom_boxplot() + coord_flip()
 ```
 
 It appears customers are more inclined to subscribe when contacted via 
@@ -289,7 +311,9 @@ ggpairs(b_soceco)
 
 ```{r}
 ggplot(bankfull, aes(emp_var_rate, euribor3m)) + geom_col()
+ggplot(bankfull, aes(euribor3m, emp_var_rate)) + geom_col()
 ggplot(bankfull, aes(num_employed, euribor3m)) + geom_col()
+ggplot(bankfull, aes(euribor3m, num_employed)) + geom_col()
 ```
 
 
@@ -298,16 +322,22 @@ _Posit questions as they come up from observations_
 1. Can you count something interesting?
 2. Can you find some trends (high, low, increase, decrease, anomalies)?
 3. Can you make a bar plot or a histogram?
+```{r}
+ggplot(bankfull, aes(x=duration_sec)) + geom_histogram(bins=10) + facet_wrap(~subscribed)
+ggplot(bankfull, aes(x=duration_sec)) + geom_histogram(bins=10) + facet_wrap(~prev_outcome)
+```
+
+
 4. Can you compare two related quantities?
 ```{r}
-ggplot(bankfull, aes(y=emp_var_rate)) + geom_boxplot()
-ggplot(bankfull, aes(y=euribor3m)) + geom_boxplot()
+ggplot(bankfull, aes(x=subscribed, y=emp_var_rate)) + geom_boxplot()
+ggplot(bankfull, aes(x=subscribed, y=euribor3m)) + geom_boxplot()
 ```
 
 5. Can you make a scatterplot?
 ```{r}
 ggplot(bankfull, aes(x=emp_var_rate, y=euribor3m)) + 
-  geom_point(aes(colour = factor(subscribed)), alpha = 0.50) + 
+  geom_point(aes(colour = factor(subscribed)), alpha = 0.50, position="jitter") + 
   labs(title = "Euribor (3 months) vs Employment Variation Rate (quarterly)")
 
 ```

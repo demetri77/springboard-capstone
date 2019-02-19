@@ -56,27 +56,26 @@ Develop a model for training data.
 #preprocessed <- preProcess(trainData, method=c("scale"))
 
 # develop a model
-modelFit <- train(subscribed ~ ., data=trainData, method="glm", na.action=na.omit)
+glm_model <- train(subscribed ~ ., data=trainData, method="glm", na.action=na.omit)
 
 ```
 
 What can we conclude from the logistic regression model? 
 ```{r}
-summary(modelFit)
+summary(glm_model)
 ```
 
 
 Let's apply our model to the test set.
 ```{r}
 
-glm_prediction <- predict(modelFit, newdata=testData)
+glm_prediction <- predict(glm_model, newdata=testData)
 ```
 
 Here is a confusion matrix, with the results expressing accuracy, sensitivity, 
 and specificity.
 ```{r}
-confMatrix <- caret::confusionMatrix(glm_prediction, testData$subscribed, mode="everything") 
-#confMatrix
+glm_confMatrix <- caret::confusionMatrix(glm_prediction, testData$subscribed, mode="everything") 
 
 # use metric parameter; F1 or Kappa
 
@@ -89,21 +88,24 @@ confMatrix <- caret::confusionMatrix(glm_prediction, testData$subscribed, mode="
 ```
 
 
-
-```{r}
-#dummyModel <- dummyVars(subscribed~.,data=bankfull_clean)
-#trainData_mat <- predict(dummyModel, newdata = trainData)
-#trainData <- data.frame(trainData_mat)
-```
-
 ## Random Forest with CARET
 ```{r}
 # play with smaller # of rf while playing/testing
 rf_model <- caret::train(subscribed~., data=trainData, method="rf",
                          trControl=trainControl(method="cv", number=5))
 
-rf_model
-#rf_prediction <- predict(_modelFit_, newdata=testData)
+summary(rf_model)
+
 ```
 
+
+```{r}
+rf_prediction <- predict(rf_model, newdata=testData)
+```
+
+```{r}
+rf_confMatrix <- caret::confusionMatrix(rf_prediction, testData$subscribed, mode="everything")
+
+rf_confMatrix
+```
 
