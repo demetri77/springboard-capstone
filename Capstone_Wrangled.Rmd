@@ -2,6 +2,7 @@
 title: "Banking Capstone - Data Wrangling and Stastical Analysis"
 author: "Demetri Lee"
 date: "December 1, 2018"
+geometry: margin=1in
 output: html_document
 ---
 
@@ -139,7 +140,7 @@ glimpse(bankfull)
 
 **Looking at Campaign results**
 
-A cursory look at the `subscribe`variable will show most customers do not sign 
+A cursory look at the `subscribe` variable will show most customers do not sign 
 up for the extra service.
 ```{r}
 ggplot(bankfull, aes(x = subscribed)) + geom_bar() + 
@@ -149,34 +150,27 @@ ggplot(bankfull, aes(x = subscribed)) + geom_bar() +
 The proportion of `no` to `yes` in a table:
 ```{r}
 prop.table(table(bankfull$subscribed))
+#bankfull %>% knitr::kable(digits = 2)
 ```
 
-How many clients from the previous campaign also signed up for a term deposit 
-this time around? This should be similar to checking for a repeat customer.
+When looking for clients that have subscribed to a previous campaign there are 
+too many `nonexistent` values. 
 ```{r}
 ggplot(bankfull, aes(prev_outcome)) + geom_bar() + 
   labs(title="Subscription Count from a Previous Campaign")
-xtabs(~prev_outcome+subscribed, bankfull)
 ```
 
-Unfortunately there is a large number of "nonexistent" values for `prev_outome`.
-
-_Although most of the sales from the previous campaign resulted in failed 
-attempts, the larger number of `nonexistent` results makes this variable 
-useless._
+When comparing clients that subscribed to the previous campaign and the 
+current campaign, the `nonexistent` values become distracting.
 ```{r}
-ggplot(bankfull, aes(x = subscribed, fill = prev_outcome)) + 
-  geom_bar(position="fill") + 
-  labs(title="Proportion of subscriptions from previous campaign relative to current campaign")
-
-prop.table(table(bankfull$prev_outcome))
+ggplot(bankfull, aes(x=prev_outcome, fill=subscribed)) + geom_bar()
 ```
 
-If the `nonexistent` values were removed, more than half the clients that 
+If the `nonexistent` values are removed, more than half the clients that 
 subscribed previously will subscribe again.
 ```{r}
 bankfull_prev <- filter(bankfull, prev_outcome != "nonexistent")
-ggplot(bankfull_prev, aes(x=subscribed, fill=prev_outcome)) + 
+ggplot(bankfull_prev, aes(x=prev_outcome, fill=subscribed)) + 
   geom_bar(position="fill") + 
   labs(title = "Proportion of subscriptions from previous campaign")
 
@@ -188,7 +182,6 @@ prop.table(table(bankfull_prev$prev_outcome))
 
 Let's take a look at whether there is any correlation with client data.
 ```{r}
-
 ggplot(bankfull, aes(x = age, fill = subscribed)) + 
   geom_bar() + 
   labs(title = "Subscriptions per Age Group")
@@ -203,6 +196,8 @@ ggplot(bankfull, aes(x = job, fill = subscribed)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
   labs(title = "Subscriptions per Job Type") # avoid using Ques in title
 
+
+
 ```
 
 Density of Customer Age
@@ -215,6 +210,10 @@ ggplot(bankfull, aes(x=age)) + geom_histogram(binwidth = 1)
 Checking elsewhere, is there any positive correlation between those who 
 `subscribe` and have a default on credit, mortgage, or a personal loan?
 ```{r}
+
+ggpairs(bankfull, columns=5:7)
+
+
 ggplot(bankfull, aes(x = cred_default, fill = subscribed)) + 
   geom_bar(position="fill") + 
   labs(title = "Subscriptions relative to Clients who Default on Credit")
@@ -266,7 +265,11 @@ ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + geom_bar()
 ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + 
   geom_bar(position="fill") + 
   labs(title="Contact by Cellular or Telephone")
-#try geom_col()
+
+#ggplot(bankfull, aes(x=contact_typ, y=age)) + 
+#  geom_col() + 
+#  labs(title="Contact by Cellular or Telephone")
+
 table(bankfull$contact_typ)
 ```
 
@@ -293,7 +296,8 @@ The most subscriptions actually happen in *May* and other summer months,
 *June, July, and August*.
 ```{r}
 
-freq(bankfull %>% filter(subscribed == "yes") %>% select(month))
+monthsCampaign <- bankfull %>% filter(subscribed == "yes") %>% select(month)
+freq(monthsCampaign)
 
 ```
 
@@ -305,8 +309,9 @@ There looks to be a high correlation in the following 2 pairs:
 * euribor3m vs employment variation rate
 * euribor3m vs number employed at bank 
 ```{r}
-b_soceco <- select(bankfull, emp_var_rate:num_employed)
-ggpairs(b_soceco)
+# From emp_var_rate to num_employed
+ggpairs(bankfull, columns=16:19)
+
 ```
 
 ```{r}
