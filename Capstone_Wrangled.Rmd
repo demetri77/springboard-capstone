@@ -169,22 +169,27 @@ ggplot(bankfull, aes(x=prev_outcome, fill=subscribed)) + geom_bar()
 If the `nonexistent` values are removed, more than half the clients that 
 subscribed previously will subscribe again.
 ```{r}
+ctable(bankfull$prev_outcome, bankfull$subscribed)
+
 bankfull_prev <- filter(bankfull, prev_outcome != "nonexistent")
 ggplot(bankfull_prev, aes(x=prev_outcome, fill=subscribed)) + 
   geom_bar(position="fill") + 
   labs(title = "Proportion of subscriptions from previous campaign")
-
-prop.table(table(bankfull_prev$prev_outcome))
 ```
 
 
 **Looking at Client Data**
 
-Let's take a look at whether there is any correlation with client data.
+Basic client data such as client age, marital status, education level or job 
+do not seem to show any strong trends.
 ```{r}
 ggplot(bankfull, aes(x = age, fill = subscribed)) + 
-  geom_bar() + 
+  geom_histogram(binwidth=10) + 
   labs(title = "Subscriptions per Age Group")
+
+ggplot(bankfull, aes(x = marital, fill = subscribed)) + 
+  geom_bar() + 
+  labs(title = "Subscriptions per Marital Status")
 
 ggplot(bankfull, aes(x = edu_lvl, fill = subscribed)) + 
   geom_bar() + 
@@ -194,47 +199,28 @@ ggplot(bankfull, aes(x = edu_lvl, fill = subscribed)) +
 ggplot(bankfull, aes(x = job, fill = subscribed)) + 
   geom_bar() + 
   theme(axis.text.x = element_text(angle = 45, hjust = 1)) + 
-  labs(title = "Subscriptions per Job Type") # avoid using Ques in title
-
-
+  labs(title = "Subscriptions per Job Type")
 
 ```
 
-Density of Customer Age
+Further review of clients' financial records (credit in default, mortgage, or 
+personal loan) also do not express any trends with respect to subscription.
 ```{r}
-plot(density(bankfull$age), main="Density of Customer Age")
-ggplot(bankfull, aes(x=age)) + geom_bar()
-ggplot(bankfull, aes(x=age)) + geom_histogram(binwidth = 1)
-```
-
-Checking elsewhere, is there any positive correlation between those who 
-`subscribe` and have a default on credit, mortgage, or a personal loan?
-```{r}
-
-ggpairs(bankfull, columns=5:7)
-
+#ggpairs(bankfull, columns=5:7)
 
 ggplot(bankfull, aes(x = cred_default, fill = subscribed)) + 
-  geom_bar(position="fill") + 
+  geom_bar() + 
   labs(title = "Subscriptions relative to Clients who Default on Credit")
 
-# -- Swap the x and fill fields -- #
 ggplot(bankfull, aes(x = mortgage, fill = subscribed)) + 
-  geom_bar(position="fill") + 
+  geom_bar() + 
   labs(title = "Subscriptions relative to Clients with a Mortgage")
 
 ggplot(bankfull, aes(x = loan, fill = subscribed)) + 
-  geom_bar(position="fill") + 
+  geom_bar() + 
   labs(title = "Susbscriptions relative to Clients with an Active Loan")
 
-#ggplot(bankfull, aes(x = mortgage, fill = subscribed)) + geom_bar(position = "fill") + facet_wrap(~loan)
-
-#3 x 3 pair plot > compared with "subscribed"
-
 ```
-
-_It seems those with defaults on credit or personal loans are not lightly to 
-subscribe but those with a housing loan may subscribe._
 
 **Last Contact Data**
 
@@ -248,10 +234,12 @@ realistic predictive model.
 
 ```{r}
 bankfull <- bankfull %>% mutate(duration_min = duration_sec/60)
-summary(bankfull$duration_min)
-ggplot(bankfull, aes(x=duration_min, fill=subscribed)) + geom_bar()
+descr(bankfull$duration_min)
+ggplot(bankfull, aes(x=duration_min, fill=subscribed)) + geom_histogram(bins=10)
+ggplot(bankfull, aes(x=duration_min, fill=subscribed)) + geom_histogram(bins=10, position="fill")
 
-#time_to_subscribed <- bankfull %>% filter(subscribed)
+#time_to_subscribed <- bankfull %>% filter(subscribed="yes")
+
 ggplot(bankfull, aes(x=subscribed, y=duration_min)) + 
   geom_boxplot(outlier.colour="blue", outlier.shape=6, outlier.size=2)
 ggplot(bankfull, aes(x=subscribed, y=duration_min)) + 
@@ -262,15 +250,7 @@ It appears customers are more inclined to subscribe when contacted via
 cellular compared to telephone.
 ```{r}
 ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + geom_bar()
-ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + 
-  geom_bar(position="fill") + 
-  labs(title="Contact by Cellular or Telephone")
 
-#ggplot(bankfull, aes(x=contact_typ, y=age)) + 
-#  geom_col() + 
-#  labs(title="Contact by Cellular or Telephone")
-
-table(bankfull$contact_typ)
 ```
 
 A regular bar graph by count makes it difficult to determine which month a 
@@ -280,7 +260,9 @@ subscribers, but that doesn't mean it's the most likely.
 ggplot(bankfull, aes(x=month, fill=subscribed)) + geom_bar()
 ```
 
-But if we stack each month as relative proportions we can see customers are more receptive to subscribing in *March* followed by *December* before *September*.
+But if we stack each month as relative proportions we can see customers are 
+more receptive to subscribing in *March* followed by *December* before 
+*September*.
 ```{r}
 ggplot(bankfull, aes(x=month, fill=subscribed)) + geom_bar(position="fill")
 ```
@@ -326,25 +308,30 @@ _Posit questions as they come up from observations_
 
 1. Can you count something interesting?
 2. Can you find some trends (high, low, increase, decrease, anomalies)?
-3. Can you make a bar plot or a histogram?
+
 ```{r}
+
+# 3. Can you make a bar plot or a histogram?
 ggplot(bankfull, aes(x=duration_sec)) + geom_histogram(bins=10) + facet_wrap(~subscribed)
 ggplot(bankfull, aes(x=duration_sec)) + geom_histogram(bins=10) + facet_wrap(~prev_outcome)
 ```
 
 
-4. Can you compare two related quantities?
+Box-plots for the employment variable rate and the 3 month Euribor rating with 
+respect to subscriptions look very similar.
 ```{r}
-ggplot(bankfull, aes(x=subscribed, y=emp_var_rate)) + geom_boxplot()
-ggplot(bankfull, aes(x=subscribed, y=euribor3m)) + geom_boxplot()
+#4. Can you compare two related quantities?
+ggplot(bankfull, aes(x=subscribed, y=emp_var_rate, fill=subscribed)) + geom_boxplot()
+
+ggplot(bankfull, aes(x=subscribed, y=euribor3m, fill=subscribed)) + geom_boxplot()
+
 ```
 
 5. Can you make a scatterplot?
 ```{r}
 ggplot(bankfull, aes(x=emp_var_rate, y=euribor3m)) + 
-  geom_point(aes(colour = factor(subscribed)), alpha = 0.50, position="jitter") + 
+  geom_point(aes(color = factor(subscribed)), alpha = 0.50, position="jitter") + 
   labs(title = "Euribor (3 months) vs Employment Variation Rate (quarterly)")
-
 ```
 
 6. Can you make a time-series plot?
