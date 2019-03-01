@@ -2,7 +2,6 @@
 title: "Banking Capstone - Data Wrangling and Stastical Analysis"
 author: "Demetri Lee"
 date: "December 1, 2018"
-geometry: margin=1in
 output: html_document
 ---
 
@@ -104,13 +103,13 @@ bankfull <- rename(bankfull, num_employed = "nr.employed")
 ```
 
 The goal is to determine which factors lead to a subscription so I'll rename 
-the dependent variable to `subscribed`, which is more descriptive than just `y`.
+the dependent variable `y` to `subscribed`, which is more descriptive.
 ```{r}
 bankfull <- rename(bankfull, subscribed = y)
 ```
 
 As per data dictionary, if `duration` equals 0 then customers is automatically 
-not subscribed. Let's create a new variable, `contacted` for results.
+not subscribed. Let's create a new logical variable, `contacted` for results.
 ```{r}
 bankfull <- mutate(bankfull, contacted = (duration_sec != "0"))
 bankfull$contacted <- as.factor(bankfull$contacted)
@@ -166,8 +165,8 @@ current campaign, the `nonexistent` values become distracting.
 ggplot(bankfull, aes(x=prev_outcome, fill=subscribed)) + geom_bar()
 ```
 
-If the `nonexistent` values are removed, more than half the clients that 
-subscribed previously will subscribe again.
+With the `nonexistent` values removed, notable more than half the clients can 
+be seen as having subscribed again.
 ```{r}
 ctable(bankfull$prev_outcome, bankfull$subscribed)
 
@@ -204,7 +203,7 @@ ggplot(bankfull, aes(x = job, fill = subscribed)) +
 ```
 
 Further review of clients' financial records (credit in default, mortgage, or 
-personal loan) also do not express any trends with respect to subscription.
+personal loan) also do not express any notable subscription trends.
 ```{r}
 #ggpairs(bankfull, columns=5:7)
 
@@ -233,18 +232,22 @@ for benchmark purposes and should be discarded if the intention is to have a
 realistic predictive model.
 
 ```{r}
-bankfull <- bankfull %>% mutate(duration_min = duration_sec/60)
-descr(bankfull$duration_min)
-ggplot(bankfull, aes(x=duration_min, fill=subscribed)) + geom_histogram(bins=10)
-ggplot(bankfull, aes(x=duration_min, fill=subscribed)) + geom_histogram(bins=10, position="fill")
+descr(bankfull$duration_sec)
+ggplot(bankfull, aes(x=duration_sec, fill=subscribed)) + geom_histogram(bins=10)
+ggplot(bankfull, aes(x=duration_sec, fill=subscribed)) + geom_histogram(bins=10, position="fill")
 
-#time_to_subscribed <- bankfull %>% filter(subscribed="yes")
-
-ggplot(bankfull, aes(x=subscribed, y=duration_min)) + 
-  geom_boxplot(outlier.colour="blue", outlier.shape=6, outlier.size=2)
-ggplot(bankfull, aes(x=subscribed, y=duration_min)) + 
-  geom_boxplot() + coord_flip()
+ggplot(bankfull, aes(x=subscribed, y=duration_sec)) + 
+  geom_boxplot(outlier.colour="blue", outlier.shape=1, outlier.size=2)
 ```
+
+Let's focus on the duration of the last contact for those who subscribed.
+```{r}
+time_to_subscribed <- filter(bankfull, subscribed=="yes")
+descr(time_to_subscribed$duration_sec)
+ggplot(time_to_subscribed, aes(x=subscribed, y=duration_sec)) + geom_boxplot()
+
+```
+
 
 It appears customers are more inclined to subscribe when contacted via 
 cellular compared to telephone.
@@ -292,15 +295,30 @@ There looks to be a high correlation in the following 2 pairs:
 * euribor3m vs number employed at bank 
 ```{r}
 # From emp_var_rate to num_employed
-ggpairs(bankfull, columns=16:19)
+ggpairs(bankfull, columns=16:20)
 
 ```
 
+Deep Correlation between Employee Variation Rate and Euribor at 3 months.
 ```{r}
-ggplot(bankfull, aes(emp_var_rate, euribor3m)) + geom_col()
-ggplot(bankfull, aes(euribor3m, emp_var_rate)) + geom_col()
-ggplot(bankfull, aes(num_employed, euribor3m)) + geom_col()
-ggplot(bankfull, aes(euribor3m, num_employed)) + geom_col()
+ggplot(bankfull, aes(emp_var_rate, euribor3m)) + geom_point() + facet_wrap(~subscribed)
+```
+
+
+```{r}
+reject <- filter(bankfull, subscribed == "no")
+accept <- filter(bankfull, subscribed == "yes")
+summary(reject$duration_sec)
+summary(accept$duration_sec)
+ggplot(bankfull, aes(subscribed, duration_sec)) + geom_boxplot()
+#outlier < Q1 - 1.5 x IQR; #255.5 - 1.5 (751 - 255.5)
+#outlier > Q3 + 1.5 x IQR; #1519.25 > 761 + 1.5 (505.5)
+# filtering out the outliers
+acceptOutlier <- filter(accept, subscribed == "yes", duration_sec <= 1519.25)
+ggplot(acceptOutlier, aes(subscribed, duration_sec)) + geom_boxplot()
+ggplot(acceptOutlier, aes(duration_sec)) + geom_histogram(bins=10)
+#ggplot(acceptOutlier, aes(duration_sec)) + geom_bar()
+
 ```
 
 
@@ -310,10 +328,10 @@ _Posit questions as they come up from observations_
 2. Can you find some trends (high, low, increase, decrease, anomalies)?
 
 ```{r}
-
 # 3. Can you make a bar plot or a histogram?
+
 ggplot(bankfull, aes(x=duration_sec)) + geom_histogram(bins=10) + facet_wrap(~subscribed)
-ggplot(bankfull, aes(x=duration_sec)) + geom_histogram(bins=10) + facet_wrap(~prev_outcome)
+
 ```
 
 
@@ -334,7 +352,7 @@ ggplot(bankfull, aes(x=emp_var_rate, y=euribor3m)) +
   labs(title = "Euribor (3 months) vs Employment Variation Rate (quarterly)")
 ```
 
-6. Can you make a time-series plot?
+6. Can you make a time-series plot? NOPE
 
 Write the revised dataset into a cleaned-up file.
 ```{r}
