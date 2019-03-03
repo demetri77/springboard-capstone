@@ -22,7 +22,7 @@ towards clients with a high chance of agreeing to registering for extra
 banking services. 
 
 ```{r}
-bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "ifffffffffiiiicdddddfl")
+bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "ifffffffffiiiicdddddf")
 ```
 
 I will be treating this a supervised classification problem. While predicting 
@@ -35,7 +35,7 @@ for subscribing.
 caret::trainControl(method = "cv", number = 2, classProbs = TRUE)
 
 Let's start with partitioning the dataset into a training and test set.
-```{r}
+```{r partition}
 set.seed(13456)
 inTrain <- createDataPartition(y=bankfull_clean$subscribed, p=0.75, list=FALSE)
 trainData <- bankfull_clean[ inTrain,]
@@ -49,19 +49,14 @@ y = trainData$subscribed
 ## Logistic Regression with CARET
 
 Develop a model for training data. 
-```{r}
-
+```{r logReg}
 # applying preProcess to scale/standardize/normalize
 #preProcess_missingdata <- reProcess(trainData, method='knnImpute')
 #preprocessed <- preProcess(trainData, method=c("scale"))
 
-# remove column "loan" and "contacted"
-trainData <- subset(trainData, select = c(age:mortgage, contact_typ:subscribed))
-
 # develop a model
-#glm_model <- train(subscribed ~ ., data=trainData, method="glm", na.action=na.omit)
-glm_model <- train(subscribed ~ duration_sec, data=trainData, method="glm", na.action=na.omit)
-
+glm_model_full <- train(subscribed ~ ., data=trainData, method="glm", na.action=na.omit)
+glm_model_dur <- train(subscribed ~ duration_sec, data=trainData, method="glm", na.action=na.omit)
 
 #trControl(sampling) //--for later
 
@@ -69,13 +64,26 @@ glm_model <- train(subscribed ~ duration_sec, data=trainData, method="glm", na.a
 
 What can we conclude from the logistic regression model? 
 ```{r}
-summary(glm_model)
+summary(glm_model_full) # results with entire variable set
+summary(glm_model_dur) # results with just variable duration_sec
+```
+
+```{r}
+# remove column "loan" and "contacted"
+trainData <- subset(trainData, select = c(age:mortgage, contact_typ:subscribed))
+
+glm_model_mod <- train(subscribed ~ ., data=trainData, method="glm", na.action=na.omit)
+
+summary(glm_model_mod)
 ```
 
 
 Let's apply our model to the test set.
 ```{r}
-glm_prediction <- predict(glm_model, newdata=testData)
+# Which model is best?
+glm_prediction <- predict(glm_model_full, newdata=testData)
+#glm_prediction <- predict(glm_model_dur, newdata=testData)
+#glm_prediction <- predict(glm_model_mod, newdata=testData)
 ```
 
 Here is a confusion matrix, with the results expressing accuracy, sensitivity, 
@@ -96,7 +104,7 @@ glm_confMatrix
 
 
 ## Random Forest with CARET
-```{r}
+```{r rdmForest}
 # play with smaller # of rf while playing/testing
 rf_model <- caret::train(subscribed~., data=trainData, method="rf",
                          trControl=trainControl(method="cv", number=5))

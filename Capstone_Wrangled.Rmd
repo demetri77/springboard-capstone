@@ -108,13 +108,6 @@ the dependent variable `y` to `subscribed`, which is more descriptive.
 bankfull <- rename(bankfull, subscribed = y)
 ```
 
-As per data dictionary, if `duration` equals 0 then customers is automatically 
-not subscribed. Let's create a new logical variable, `contacted` for results.
-```{r}
-bankfull <- mutate(bankfull, contacted = (duration_sec != "0"))
-bankfull$contacted <- as.factor(bankfull$contacted)
-```
-
 Replace all periods ('.') in values with underscores ('_') for legibility.
 ```{r}
 summary(bankfull$job) # job types before replacement 
@@ -299,7 +292,8 @@ ggpairs(bankfull, columns=16:20)
 
 ```
 
-Deep Correlation between Employee Variation Rate and Euribor at 3 months.
+Deep Correlation between Employee Variation Rate and Euribor at 3 months but 
+doesn't seem like it affects client subscriptions.
 ```{r}
 ggplot(bankfull, aes(emp_var_rate, euribor3m)) + geom_point() + facet_wrap(~subscribed)
 ```
@@ -311,11 +305,12 @@ accept <- filter(bankfull, subscribed == "yes")
 summary(reject$duration_sec)
 summary(accept$duration_sec)
 ggplot(bankfull, aes(subscribed, duration_sec)) + geom_boxplot()
-#outlier < Q1 - 1.5 x IQR; #255.5 - 1.5 (751 - 255.5)
-#outlier > Q3 + 1.5 x IQR; #1519.25 > 761 + 1.5 (505.5)
-# filtering out the outliers
-acceptOutlier <- filter(accept, subscribed == "yes", duration_sec <= 1519.25)
-ggplot(acceptOutlier, aes(subscribed, duration_sec)) + geom_boxplot()
+#outlier < Q1 - 1.5 x IQR; #255.5 - 1.5(751 - 255.5)
+#outlier > Q3 + 1.5 x IQR; #1519.25 > 761 + 1.5(505.5)
+# filtering out the outliers for further investigation
+acceptOutlier <- filter(accept, subscribed == "yes" & duration_sec <= 1519.25)
+ggplot(acceptOutlier, aes(subscribed, duration_sec)) + geom_boxplot() + 
+    labs(title = "Boxplot with Outliers removed")
 ggplot(acceptOutlier, aes(duration_sec)) + geom_histogram(bins=10)
 #ggplot(acceptOutlier, aes(duration_sec)) + geom_bar()
 
@@ -329,9 +324,7 @@ _Posit questions as they come up from observations_
 
 ```{r}
 # 3. Can you make a bar plot or a histogram?
-
 ggplot(bankfull, aes(x=duration_sec)) + geom_histogram(bins=10) + facet_wrap(~subscribed)
-
 ```
 
 
@@ -345,8 +338,9 @@ ggplot(bankfull, aes(x=subscribed, y=euribor3m, fill=subscribed)) + geom_boxplot
 
 ```
 
-5. Can you make a scatterplot?
+
 ```{r}
+# 5. Can you make a scatterplot?
 ggplot(bankfull, aes(x=emp_var_rate, y=euribor3m)) + 
   geom_point(aes(color = factor(subscribed)), alpha = 0.50, position="jitter") + 
   labs(title = "Euribor (3 months) vs Employment Variation Rate (quarterly)")
