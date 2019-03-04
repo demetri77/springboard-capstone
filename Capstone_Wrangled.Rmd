@@ -245,9 +245,19 @@ ggplot(time_to_subscribed, aes(x=subscribed, y=duration_sec)) + geom_boxplot()
 It appears customers are more inclined to subscribe when contacted via 
 cellular compared to telephone.
 ```{r}
-ggplot(bankfull, aes(x=contact_typ, fill = subscribed)) + geom_bar()
-
+ggplot(bankfull, aes(x=contact_typ, fill=subscribed)) + 
+  geom_bar(position="fill")
+xtabs(~contact_typ + subscribed, data=bankfull)
 ```
+
+It looks somewhat safe to say the chance of a susbscription occuring decreases 
+with each additional contact. The bar graph indicates clients will not 
+subscribe if contacted more than 11 times.
+```{r}
+ggplot(bankfull, aes(x=contact_cnt, fill=subscribed)) + geom_bar(position="fill")
+xtabs(~contact_cnt + subscribed, data=bankfull)
+```
+
 
 A regular bar graph by count makes it difficult to determine which month a 
 client is most likely to subscribe. At best it looks like *May* has the most 
@@ -292,7 +302,7 @@ ggpairs(bankfull, columns=16:20)
 
 ```
 
-Deep Correlation between Employee Variation Rate and Euribor at 3 months but 
+Deep correlation between Employee Variation Rate and Euribor at 3 months but 
 doesn't seem like it affects client subscriptions.
 ```{r}
 ggplot(bankfull, aes(emp_var_rate, euribor3m)) + geom_point() + facet_wrap(~subscribed)
@@ -350,6 +360,6 @@ ggplot(bankfull, aes(x=emp_var_rate, y=euribor3m)) +
 
 Write the revised dataset into a cleaned-up file.
 ```{r}
-write_csv(bankfull, path="bankfull_clean.csv")
+write_csv(bankfull, path="bankfull_clean.csv", col_names=TRUE)
 ```
 

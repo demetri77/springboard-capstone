@@ -22,7 +22,7 @@ towards clients with a high chance of agreeing to registering for extra
 banking services. 
 
 ```{r}
-bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "ifffffffffiiiicdddddf")
+bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "ifffffffffiiiifdddddf")
 ```
 
 I will be treating this a supervised classification problem. While predicting 
@@ -41,19 +41,14 @@ inTrain <- createDataPartition(y=bankfull_clean$subscribed, p=0.75, list=FALSE)
 trainData <- bankfull_clean[ inTrain,]
 testData  <- bankfull_clean[-inTrain,]
 
-x = trainData[,]
-y = trainData$subscribed
-
+#x = trainData[,]
+#y = trainData$subscribed
 ```
 
 ## Logistic Regression with CARET
 
 Develop a model for training data. 
 ```{r logReg}
-# applying preProcess to scale/standardize/normalize
-#preProcess_missingdata <- reProcess(trainData, method='knnImpute')
-#preprocessed <- preProcess(trainData, method=c("scale"))
-
 # develop a model
 glm_model_full <- train(subscribed ~ ., data=trainData, method="glm", na.action=na.omit)
 glm_model_dur <- train(subscribed ~ duration_sec, data=trainData, method="glm", na.action=na.omit)
@@ -122,5 +117,9 @@ rf_prediction <- predict(rf_model, newdata=testData)
 rf_confMatrix <- caret::confusionMatrix(rf_prediction, testData$subscribed, mode="everything")
 
 rf_confMatrix
+```
+
+```{r}
+write_csv(bankfull_clean, path="bankfull_ml.csv", col_names=TRUE)
 ```
 
