@@ -380,18 +380,7 @@ $(document).ready(function () {
 <div id="trying-to-predict-the-success-of-bank-telemarketing" class="section level2">
 <h2>Trying to predict the success of bank telemarketing</h2>
 <p>I’m trying to predict the success of telemarketing calls for a bank that’s selling long-term deposits. A Portuguese retail bank was addressed, with data collected from 2008 to 2013, thus including the effects of the recent financial crisis of 2008. With 21 features available for analysis, I hope to derive knowledge for a model that would confirm how to better focus resources towards clients with a high chance of agreeing to registering for extra banking services.</p>
-<pre class="r"><code>bankfull_clean &lt;- read_csv(&quot;bankfull_clean.csv&quot;, col_types = &quot;ifffffffffiiiicdddddf&quot;)</code></pre>
-<pre><code>## Warning: Unnamed `col_types` should have the same length as `col_names`.
-## Using smaller of the two.</code></pre>
-<pre><code>## Warning: 4119 parsing failures.
-## row col   expected     actual                 file
-##   1  -- 21 columns 22 columns &#39;bankfull_clean.csv&#39;
-##   2  -- 21 columns 22 columns &#39;bankfull_clean.csv&#39;
-##   3  -- 21 columns 22 columns &#39;bankfull_clean.csv&#39;
-##   4  -- 21 columns 22 columns &#39;bankfull_clean.csv&#39;
-##   5  -- 21 columns 22 columns &#39;bankfull_clean.csv&#39;
-## ... ... .......... .......... ....................
-## See problems(...) for more details.</code></pre>
+<pre class="r"><code>bankfull_clean &lt;- read_csv(&quot;bankfull_clean.csv&quot;, col_types = &quot;ifffffffffiiiifdddddf&quot;)</code></pre>
 <p>I will be treating this a supervised classification problem. While predicting whether a customer will subscribe to a new service, I need to find the main predictors while developing a model that best expressses a client’s decision for subscribing.</p>
 </div>
 <div id="set-up-model-parameters" class="section level2">
@@ -403,17 +392,13 @@ inTrain &lt;- createDataPartition(y=bankfull_clean$subscribed, p=0.75, list=FALS
 trainData &lt;- bankfull_clean[ inTrain,]
 testData  &lt;- bankfull_clean[-inTrain,]
 
-x = trainData[,]
-y = trainData$subscribed</code></pre>
+#x = trainData[,]
+#y = trainData$subscribed</code></pre>
 </div>
 <div id="logistic-regression-with-caret" class="section level2">
 <h2>Logistic Regression with CARET</h2>
 <p>Develop a model for training data.</p>
-<pre class="r"><code># applying preProcess to scale/standardize/normalize
-#preProcess_missingdata &lt;- reProcess(trainData, method=&#39;knnImpute&#39;)
-#preprocessed &lt;- preProcess(trainData, method=c(&quot;scale&quot;))
-
-# develop a model
+<pre class="r"><code># develop a model
 glm_model_full &lt;- train(subscribed ~ ., data=trainData, method=&quot;glm&quot;, na.action=na.omit)</code></pre>
 <pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
 ## ifelse(type == : prediction from a rank-deficient fit may be misleading
@@ -504,7 +489,7 @@ glm_model_full &lt;- train(subscribed ~ ., data=trainData, method=&quot;glm&quot
 ## 
 ## Coefficients: (1 not defined because of singularities)
 ##                              Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)                -9.631e+01  1.426e+02  -0.675  0.49957    
+## (Intercept)                -9.529e+01  1.427e+02  -0.668  0.50417    
 ## age                         1.302e-02  9.681e-03   1.345  0.17861    
 ## jobservices                 3.247e-01  3.603e-01   0.901  0.36751    
 ## jobadmin                    1.612e-01  3.195e-01   0.505  0.61373    
@@ -551,8 +536,8 @@ glm_model_full &lt;- train(subscribed ~ ., data=trainData, method=&quot;glm&quot
 ## contact_cnt                -1.437e-01  5.597e-02  -2.568  0.01023 *  
 ## days_passed                -2.209e-04  7.561e-04  -0.292  0.77020    
 ## prev_contact_cnt            2.076e-01  2.213e-01   0.938  0.34823    
-## prev_outcomenonexistent     1.025e+00  3.714e-01   2.760  0.00578 ** 
-## prev_outcomesuccess         1.885e+00  7.508e-01   2.511  0.01204 *  
+## prev_outcomefailure        -1.025e+00  3.714e-01  -2.760  0.00578 ** 
+## prev_outcomesuccess         8.603e-01  7.430e-01   1.158  0.24689    
 ## emp_var_rate               -6.523e-01  5.455e-01  -1.196  0.23179    
 ## cons_price_idx              1.139e+00  9.427e-01   1.208  0.22689    
 ## cons_conf_idx               5.959e-02  3.138e-02   1.899  0.05755 .  
@@ -644,7 +629,7 @@ glm_model_mod &lt;- train(subscribed ~ ., data=trainData, method=&quot;glm&quot;
 ## 
 ## Coefficients:
 ##                              Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)                -9.154e+01  1.423e+02  -0.643  0.52012    
+## (Intercept)                -9.052e+01  1.423e+02  -0.636  0.52482    
 ## age                         1.292e-02  9.693e-03   1.333  0.18258    
 ## jobservices                 3.231e-01  3.602e-01   0.897  0.36962    
 ## jobadmin                    1.602e-01  3.194e-01   0.502  0.61601    
@@ -689,8 +674,8 @@ glm_model_mod &lt;- train(subscribed ~ ., data=trainData, method=&quot;glm&quot;
 ## contact_cnt                -1.440e-01  5.596e-02  -2.572  0.01010 *  
 ## days_passed                -2.067e-04  7.548e-04  -0.274  0.78421    
 ## prev_contact_cnt            2.096e-01  2.212e-01   0.948  0.34324    
-## prev_outcomenonexistent     1.024e+00  3.711e-01   2.758  0.00582 ** 
-## prev_outcomesuccess         1.893e+00  7.496e-01   2.525  0.01156 *  
+## prev_outcomefailure        -1.024e+00  3.711e-01  -2.758  0.00582 ** 
+## prev_outcomesuccess         8.694e-01  7.427e-01   1.171  0.24172    
 ## emp_var_rate               -6.443e-01  5.447e-01  -1.183  0.23681    
 ## cons_price_idx              1.108e+00  9.404e-01   1.178  0.23884    
 ## cons_conf_idx               5.947e-02  3.140e-02   1.894  0.05821 .  
@@ -793,31 +778,32 @@ rf_confMatrix</code></pre>
 ## 
 ##           Reference
 ## Prediction  no yes
-##        no  871  45
-##        yes  46  67
+##        no  867  45
+##        yes  50  67
 ##                                           
-##                Accuracy : 0.9116          
-##                  95% CI : (0.8925, 0.9282)
+##                Accuracy : 0.9077          
+##                  95% CI : (0.8883, 0.9247)
 ##     No Information Rate : 0.8912          
-##     P-Value [Acc &gt; NIR] : 0.01795         
+##     P-Value [Acc &gt; NIR] : 0.04685         
 ##                                           
-##                   Kappa : 0.5459          
-##  Mcnemar&#39;s Test P-Value : 1.00000         
+##                   Kappa : 0.5332          
+##  Mcnemar&#39;s Test P-Value : 0.68152         
 ##                                           
-##             Sensitivity : 0.9498          
+##             Sensitivity : 0.9455          
 ##             Specificity : 0.5982          
-##          Pos Pred Value : 0.9509          
-##          Neg Pred Value : 0.5929          
-##               Precision : 0.9509          
-##                  Recall : 0.9498          
-##                      F1 : 0.9504          
+##          Pos Pred Value : 0.9507          
+##          Neg Pred Value : 0.5726          
+##               Precision : 0.9507          
+##                  Recall : 0.9455          
+##                      F1 : 0.9481          
 ##              Prevalence : 0.8912          
-##          Detection Rate : 0.8465          
-##    Detection Prevalence : 0.8902          
-##       Balanced Accuracy : 0.7740          
+##          Detection Rate : 0.8426          
+##    Detection Prevalence : 0.8863          
+##       Balanced Accuracy : 0.7718          
 ##                                           
 ##        &#39;Positive&#39; Class : no              
 ## </code></pre>
+<pre class="r"><code>write_csv(bankfull_clean, path=&quot;bankfull_ml.csv&quot;, col_names=TRUE)</code></pre>
 </div>
 
 

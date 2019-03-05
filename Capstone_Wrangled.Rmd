@@ -240,11 +240,10 @@ descr(time_to_subscribed$duration_sec)
 ggplot(time_to_subscribed, aes(x=subscribed, y=duration_sec)) + geom_boxplot()
 
 ```
-
-
 It appears customers are more inclined to subscribe when contacted via 
 cellular compared to telephone.
 ```{r}
+ggplot(bankfull, aes(x=contact_typ, fill=subscribed)) + geom_bar()
 ggplot(bankfull, aes(x=contact_typ, fill=subscribed)) + 
   geom_bar(position="fill")
 xtabs(~contact_typ + subscribed, data=bankfull)
@@ -252,10 +251,11 @@ xtabs(~contact_typ + subscribed, data=bankfull)
 
 It looks somewhat safe to say the chance of a susbscription occuring decreases 
 with each additional contact. The bar graph indicates clients will not 
-subscribe if contacted more than 11 times.
+subscribe if contacted by more than the maximum count value.
 ```{r}
 ggplot(bankfull, aes(x=contact_cnt, fill=subscribed)) + geom_bar(position="fill")
-xtabs(~contact_cnt + subscribed, data=bankfull)
+maximum_contact_cnt <- max(bankfull %>% filter(subscribed=="yes") %>% select(contact_cnt))
+maximum_contact_cnt
 ```
 
 
@@ -283,16 +283,15 @@ ggplot(bankfull, aes(x=day_of_week, fill=subscribed)) +
 The most subscriptions actually happen in *May* and other summer months, 
 *June, July, and August*.
 ```{r}
-
 monthsCampaign <- bankfull %>% filter(subscribed == "yes") %>% select(month)
 freq(monthsCampaign)
-
 ```
 
 
 **Socioeconomic Data**
 
-There looks to be a high correlation in the following 2 pairs:
+While generating a matrix of plots between the socioeconomic data, there looks 
+to be a high correlation in the following 2 pairs:
 
 * euribor3m vs employment variation rate
 * euribor3m vs number employed at bank 
@@ -304,11 +303,26 @@ ggpairs(bankfull, columns=16:20)
 
 Deep correlation between Employee Variation Rate and Euribor at 3 months but 
 doesn't seem like it affects client subscriptions.
-```{r}
+```{r correlation}
 ggplot(bankfull, aes(emp_var_rate, euribor3m)) + geom_point() + facet_wrap(~subscribed)
 ```
 
+Running a scatterplot for the Employment Variation Rate versus the 3 month 
+Euribor reiterates the correlation..
+```{r}
+ggplot(bankfull, aes(x=emp_var_rate, y=euribor3m)) + 
+  geom_point(aes(color = factor(subscribed)), alpha = 0.50, position="jitter") + 
+  labs(title = "Euribor (3 months) vs Employment Variation Rate (quarterly)")
+```
 
+Using box-plots used for the employment variable rate and the 3 month Euribor 
+rating with respect to subscriptions continue to look similar.
+```{r}
+ggplot(bankfull, aes(x=subscribed, y=emp_var_rate, fill=subscribed)) + geom_boxplot()
+ggplot(bankfull, aes(x=subscribed, y=euribor3m, fill=subscribed)) + geom_boxplot()
+```
+
+Further investigation of the duration_sec factor.
 ```{r}
 reject <- filter(bankfull, subscribed == "no")
 accept <- filter(bankfull, subscribed == "yes")
@@ -326,40 +340,11 @@ ggplot(acceptOutlier, aes(duration_sec)) + geom_histogram(bins=10)
 
 ```
 
-
-_Posit questions as they come up from observations_
-
-1. Can you count something interesting?
-2. Can you find some trends (high, low, increase, decrease, anomalies)?
-
 ```{r}
-# 3. Can you make a bar plot or a histogram?
 ggplot(bankfull, aes(x=duration_sec)) + geom_histogram(bins=10) + facet_wrap(~subscribed)
 ```
-
-
-Box-plots for the employment variable rate and the 3 month Euribor rating with 
-respect to subscriptions look very similar.
-```{r}
-#4. Can you compare two related quantities?
-ggplot(bankfull, aes(x=subscribed, y=emp_var_rate, fill=subscribed)) + geom_boxplot()
-
-ggplot(bankfull, aes(x=subscribed, y=euribor3m, fill=subscribed)) + geom_boxplot()
-
-```
-
-
-```{r}
-# 5. Can you make a scatterplot?
-ggplot(bankfull, aes(x=emp_var_rate, y=euribor3m)) + 
-  geom_point(aes(color = factor(subscribed)), alpha = 0.50, position="jitter") + 
-  labs(title = "Euribor (3 months) vs Employment Variation Rate (quarterly)")
-```
-
-6. Can you make a time-series plot? NOPE
 
 Write the revised dataset into a cleaned-up file.
 ```{r}
 write_csv(bankfull, path="bankfull_clean.csv", col_names=TRUE)
 ```
-
