@@ -111,14 +111,12 @@ bankfull <- rename(bankfull, subscribed = y)
 Replace all periods ('.') in values with underscores ('_') for legibility.
 ```{r}
 summary(bankfull$job) # job types before replacement 
-jtemp <- bankfull$job
-bankfull$job <- gsub("\\.", "", jtemp)
+bankfull$job <- gsub("\\.", "", bankfull$job)
 bankfull$job <- as.factor(bankfull$job)
 summary(bankfull$job) # job types after replacement
 
 summary(bankfull$edu_lvl) # education levels before replacement
-etemp <- bankfull$edu_lvl
-bankfull$edu_lvl <- gsub("\\.", "_", etemp)
+bankfull$edu_lvl <- gsub("\\.", "_", bankfull$edu_lvl)
 bankfull$edu_lvl <- as.factor(bankfull$edu_lvl)
 summary(bankfull$edu_lvl) # education levels after replacement
 ```
@@ -128,7 +126,7 @@ Take a quick check of the dataset with glimpse.
 glimpse(bankfull)
 ```
 
-### Explorating Data with Plots
+### Exploring Data with Plots
 
 **Looking at Campaign results**
 
@@ -240,13 +238,14 @@ descr(time_to_subscribed$duration_sec)
 ggplot(time_to_subscribed, aes(x=subscribed, y=duration_sec)) + geom_boxplot()
 
 ```
+
 It appears customers are more inclined to subscribe when contacted via 
 cellular compared to telephone.
 ```{r}
 ggplot(bankfull, aes(x=contact_typ, fill=subscribed)) + geom_bar()
 ggplot(bankfull, aes(x=contact_typ, fill=subscribed)) + 
   geom_bar(position="fill")
-xtabs(~contact_typ + subscribed, data=bankfull)
+ctable(bankfull$contact_typ, bankfull$subscribed)
 ```
 
 It looks somewhat safe to say the chance of a susbscription occuring decreases 
@@ -273,7 +272,9 @@ more receptive to subscribing in *March* followed by *December* before
 ggplot(bankfull, aes(x=month, fill=subscribed)) + geom_bar(position="fill")
 ```
 
-Updated to include weekdays and we see the second column, *Wednesday*, becomes a good day to subscribe.
+Updated to include weekdays and we see the second column, *Wednesday*, becomes 
+a good day to subscribe.
+
 ```{r}
 ggplot(bankfull, aes(x=day_of_week, fill=subscribed)) + 
   geom_bar(position="fill") +
@@ -282,6 +283,7 @@ ggplot(bankfull, aes(x=day_of_week, fill=subscribed)) +
 
 The most subscriptions actually happen in *May* and other summer months, 
 *June, July, and August*.
+
 ```{r}
 monthsCampaign <- bankfull %>% filter(subscribed == "yes") %>% select(month)
 freq(monthsCampaign)
@@ -293,8 +295,9 @@ freq(monthsCampaign)
 While generating a matrix of plots between the socioeconomic data, there looks 
 to be a high correlation in the following 2 pairs:
 
-* euribor3m vs employment variation rate
-* euribor3m vs number employed at bank 
+- euribor3m vs employment variation rate
+- euribor3m vs number employed at bank
+
 ```{r}
 # From emp_var_rate to num_employed
 ggpairs(bankfull, columns=16:20)
@@ -303,12 +306,14 @@ ggpairs(bankfull, columns=16:20)
 
 Deep correlation between Employee Variation Rate and Euribor at 3 months but 
 doesn't seem like it affects client subscriptions.
+
 ```{r correlation}
 ggplot(bankfull, aes(emp_var_rate, euribor3m)) + geom_point() + facet_wrap(~subscribed)
 ```
 
 Running a scatterplot for the Employment Variation Rate versus the 3 month 
-Euribor reiterates the correlation..
+Euribor reiterates the correlation.
+
 ```{r}
 ggplot(bankfull, aes(x=emp_var_rate, y=euribor3m)) + 
   geom_point(aes(color = factor(subscribed)), alpha = 0.50, position="jitter") + 
@@ -317,12 +322,14 @@ ggplot(bankfull, aes(x=emp_var_rate, y=euribor3m)) +
 
 Using box-plots used for the employment variable rate and the 3 month Euribor 
 rating with respect to subscriptions continue to look similar.
+
 ```{r}
 ggplot(bankfull, aes(x=subscribed, y=emp_var_rate, fill=subscribed)) + geom_boxplot()
 ggplot(bankfull, aes(x=subscribed, y=euribor3m, fill=subscribed)) + geom_boxplot()
 ```
 
 Further investigation of the duration_sec factor.
+
 ```{r}
 reject <- filter(bankfull, subscribed == "no")
 accept <- filter(bankfull, subscribed == "yes")
@@ -345,6 +352,7 @@ ggplot(bankfull, aes(x=duration_sec)) + geom_histogram(bins=10) + facet_wrap(~su
 ```
 
 Write the revised dataset into a cleaned-up file.
+
 ```{r}
 write_csv(bankfull, path="bankfull_clean.csv", col_names=TRUE)
 ```
