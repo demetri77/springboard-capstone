@@ -92,8 +92,8 @@ Let's rename variables to be more descriptive and avoid use of periods.
 bankfull <- rename(bankfull, edu_lvl = "education")
 bankfull <- rename(bankfull, cred_default = "default")
 bankfull <- rename(bankfull, mortgage = "housing")
-bankfull <- rename(bankfull, duration_sec = "duration")
 bankfull <- rename(bankfull, contact_typ = "contact")
+bankfull <- rename(bankfull, duration_sec = "duration")
 bankfull <- rename(bankfull, contact_cnt = "campaign")
 bankfull <- rename(bankfull, days_passed = "pdays")
 bankfull <- rename(bankfull, prev_contact_cnt = "previous")
@@ -136,7 +136,7 @@ glimpse(bankfull)
 **Looking at Campaign results**
 
 A cursory look at the `subscribe` variable will show most customers do not sign 
-up for the extra service.
+up for the extra service so the results are very skewed.
 
 ```{r}
 ggplot(bankfull, aes(x = subscribed, fill = subscribed)) + geom_bar() + 
@@ -165,7 +165,7 @@ current campaign, the `nonexistent` values become distracting.
 ggplot(bankfull, aes(x=prev_outcome, fill=subscribed)) + geom_bar()
 ```
 
-With the `nonexistent` values removed, notable more than half the clients can 
+With the `nonexistent` values removed, notably more than half the clients can 
 be seen as having subscribed again.
 
 ```{r}
@@ -226,68 +226,26 @@ ggplot(bankfull, aes(x = loan, fill = subscribed)) +
 
 **Last Contact Data**
 
-The variable _duration_ refers to the length of time the customer was last 
-contacted, in seconds. Important note:  this attribute highly affects the 
-output target (e.g., if duration=0 then subscribed="no"). Yet, the duration 
-is not known before a call is performed. Also, after the end of the call 
-_subscribed_ is obviously known. Thus, this input should only be included 
-for benchmark purposes and should be discarded if the intention is to have a 
-realistic predictive model.
+Last contact data will include details about the last contact with the client. Variables includ type of contact, the day and month of contact, and the 
+duration of the last contact.
 
-```{r}
-descr(bankfull$duration_sec)
-# NB! skewed distribution; work w/ the logarithmic scale
-ggplot(bankfull, aes(x=duration_sec, fill=subscribed)) + geom_histogram(bins=10) + 
-  scale_y_continuous(trans='log2')
-ggplot(bankfull, aes(x=duration_sec, fill=subscribed)) + geom_histogram(bins=10, position="fill")
-
-ggplot(bankfull, aes(x=subscribed, y=duration_sec)) + 
-  geom_boxplot(outlier.colour="red", outlier.shape=1, outlier.size=2) + 
-  scale_y_continuous(trans='log2')
-
-```
-
-Let's focus on the duration of the last contact for those who subscribed.
-
-```{r}
-time_to_subscribed <- filter(bankfull, subscribed=="yes")
-descr(time_to_subscribed$duration_sec)
-ggplot(time_to_subscribed, aes(x=subscribed, y=duration_sec)) + 
-  geom_boxplot() + scale_y_continuous(trans='log2')
-
-```
-
-It appears customers are more inclined to subscribe when contacted via 
-cellular compared to telephone.
+Regarding last contact data, it appears customers are more inclined to 
+subscribe when contacted via cellular compared to telephone.
 
 ```{r}
 ggplot(bankfull, aes(x=contact_typ, fill=subscribed)) + geom_bar()
-ggplot(bankfull, aes(x=contact_typ, fill=subscribed)) + 
-  geom_bar(position="fill")
 ctable(bankfull$contact_typ, bankfull$subscribed)
 ```
 
-It looks somewhat safe to say the chance of a susbscription occuring decreases 
-with each additional contact.
-
-```{r}
-ggplot(bankfull, aes(x=contact_cnt, fill=subscribed)) + geom_bar(position="fill")
-maximum_contact_cnt <- max(bankfull %>% filter(subscribed=="yes") %>% select(contact_cnt))
-maximum_contact_cnt # sort out how to express this value in the Rmd
-```
-
-The bar graph indicates clients will not subscribe if contacted by more than 
-the maximum count value, `r maximum_contact_cnt`.
-
-A regular bar graph by count makes it difficult to determine which month a 
-client is most likely to subscribe. At best it looks like **May** has the most 
-subscribers, but that doesn't mean it's the most likely.
+When looking at which month a client is most likely to subscribe, a regular 
+bar graph by count makes it difficult. At best it looks like *May* has the 
+most subscribers, but that doesn't mean it's the most likely.
 
 ```{r}
 ggplot(bankfull, aes(x=month, fill=subscribed)) + geom_bar()
 ```
 
-But if we stack each month as relative proportions we can see customers are 
+If we stack each month as relative proportions we can see customers are 
 more receptive to subscribing in *March* followed by *December* before 
 *September*.
 
@@ -295,8 +253,22 @@ more receptive to subscribing in *March* followed by *December* before
 ggplot(bankfull, aes(x=month, fill=subscribed)) + geom_bar(position="fill")
 ```
 
-Updated to include weekdays and we see the second column, *Wednesday*, becomes 
-a good day to subscribe.
+Here is a cross-tabulation of the monthly subscriptions with explicit results:
+```{r}
+ctable(bankfull$month, bankfull$subscribed)
+```
+
+The most subscriptions actually happen in *May* and other summer months, 
+*June, July, and August* as confirmed by the frequency chart. Winter months 
+*January* and *February* are not a part of the dataset.
+
+```{r}
+monthsCampaign <- bankfull %>% filter(subscribed == "yes") %>% select(month)
+freq(monthsCampaign)
+```
+
+When we integrate weekdays with the monthly values, the second column, 
+*Wednesday*, becomes a fairly good day to subscribe.
 
 ```{r}
 ggplot(bankfull, aes(x=day_of_week, fill=subscribed)) + 
@@ -304,12 +276,63 @@ ggplot(bankfull, aes(x=day_of_week, fill=subscribed)) +
   facet_wrap(vars(month))
 ```
 
-The most subscriptions actually happen in *May* and other summer months, 
-*June, July, and August*.
+The variable _duration_ refers to the length of time in seconds spent with the 
+customer at the last point of contact. Important note: this attribute highly 
+affects the output target (e.g., if duration=0 then subscribed="no"). Yet, 
+the duration is not known before a call is performed. Also, after the end of 
+the call _subscribed_ is obviously known. Thus, this input should only be 
+included for benchmark purposes and should be discarded if the intention is to 
+have a realistic predictive model.
 
 ```{r}
-monthsCampaign <- bankfull %>% filter(subscribed == "yes") %>% select(month)
-freq(monthsCampaign)
+descr(bankfull$duration_sec)
+
+ggplot(bankfull, aes(x=duration_sec, fill=subscribed)) + geom_histogram(bins=10)
+
+ggplot(bankfull, aes(x=subscribed, y=duration_sec, fill=subscribed)) + 
+  geom_boxplot(outlier.shape=16, alpha=.5)
+
+```
+
+
+```{r}
+subscribedYES <- filter(bankfull, subscribed=="yes") %>% select(duration_sec)
+#durMinYES <- subscribedYES$duration_sec/60
+subscribedNO <- filter(bankfull, subscribed=="no") %>% select(duration_sec)
+#durMinNO <- subscribedNO$duration_sec/60
+descr(subscribedYES)
+descr(subscribedNO)
+```
+
+There's a slight overlap in the Interquaritle Range of subscribers with the 
+non-subscribers. let's focus on the duration of the last contact for those who 
+subscribed.
+
+Taking note the duration of the last contact for That is, there's a cut-off from the Q3 for non-subscribers and Q1 of subscribers.
+
+It looks somewhat safe to say the chance of a susbscription occuring decreases 
+with each additional contact.
+
+```{r}
+ggplot(bankfull, aes(x=contact_cnt, fill=subscribed)) + geom_bar(position="fill")
+maximum_contact_cnt <- max(bankfull %>% filter(subscribed=="yes") %>% 
+  select(contact_cnt))
+maximum_contact_cnt # sort out how to express this value in the Rmd
+```
+
+The bar graph indicates clients will not subscribe if contacted by more than 
+the maximum count value, `r maximum_contact_cnt`.
+
+
+The following density plot for the number of days that passed by after the client was last contacted from a previous campaign does not indicate any special trends. Note that a value of 999 means client was not previously contacted.
+
+```{r}
+ggplot(bankfull, aes(days_passed)) + geom_histogram(bins=10)
+
+freq(bankfull$days_passed)
+ctable(bankfull$days_passed, bankfull$subscribed)
+
+ggplot(bankfull, aes(x=prev_contact_cnt)) + geom_density() + facet_wrap(~subscribed)
 ```
 
 
@@ -323,7 +346,8 @@ to be a high correlation in the following 2 pairs:
 
 ```{r}
 # From emp_var_rate to num_employed
-ggpairs(bankfull, columns=16:20)
+
+ggpairs(bankfull, columns=16:20, progress=FALSE)
 
 ```
 
@@ -331,8 +355,7 @@ Deep correlation between Employee Variation Rate and Euribor at 3 months but
 doesn't seem like it affects client subscriptions.
 
 ```{r correlation}
-ggplot(bankfull, aes(emp_var_rate, euribor3m)) + geom_point() + facet_wrap(~subscribed) + 
-  geom_smooth()
+ggplot(bankfull, aes(emp_var_rate, euribor3m)) + geom_point() + facet_wrap(~subscribed) + geom_smooth(method=lm)
 ```
 
 Running a scatterplot for the Employment Variation Rate versus the 3 month 

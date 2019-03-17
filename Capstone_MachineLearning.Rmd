@@ -35,6 +35,7 @@ for subscribing.
 caret::trainControl(method = "cv", number = 2, classProbs = TRUE)
 
 Let's start with partitioning the dataset into a training and test set.
+
 ```{r partition}
 set.seed(13456)
 inTrain <- createDataPartition(y=bankfull_clean$subscribed, p=0.75, list=FALSE)
@@ -48,9 +49,10 @@ testData  <- bankfull_clean[-inTrain,]
 ## Logistic Regression with CARET
 
 Develop a model for training data. 
+
 ```{r logReg}
 # develop a model
-glm_model_full <- train(subscribed ~ ., data=trainData, method="glm", na.action=na.omit)
+glm_model_full <- train(subscribed ~ ., data=trainData, method="glmnet", na.action=na.omit)
 glm_model_dur <- train(subscribed ~ duration_sec, data=trainData, method="glm", na.action=na.omit)
 
 #trControl(sampling) //--for later
@@ -58,6 +60,7 @@ glm_model_dur <- train(subscribed ~ duration_sec, data=trainData, method="glm", 
 ```
 
 What can we conclude from the logistic regression model? 
+
 ```{r}
 summary(glm_model_full) # results with entire variable set
 summary(glm_model_dur) # results with just variable duration_sec

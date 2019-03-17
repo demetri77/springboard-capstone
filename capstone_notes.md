@@ -166,6 +166,25 @@ subscription offer.
 table(bankfull$subscribed)
 ```
 
+```
+library(randomForest)
+n <- nrow(bankfull_clean)
+
+rf.train.1 <- bankfull_clean[1:n, c("age", "edu_lvl")]
+rf.label <- as.factor(bankfull_clean$subscribed)
+
+set.seed(1234)
+rf.1 <- randomForest(x=rf.train.1, y=rf.label, importance=TRUE, ntree=500)
+rf.1
+
+varImpPlot(rf.1)
+```
+
+```{r REMOVED}
+# applying preProcess to scale/standardize/normalize
+#preProcess_missingdata <- reProcess(trainData, method='knnImpute')
+#preprocessed <- preProcess(trainData, method=c("scale"))
+```
 
 anyNA
 bankfull_clean %>% map_lgl(anyNA)
@@ -180,6 +199,14 @@ geom_boxplot
 
 # ggpairs
 # change the level order for subscribed yes/no 
+0.97 correlation -> euribor3m vs employment variation rate
+
+Feature Groups
+
+* bank client data
+* last contact data
+* other attributes
+* social & economic context attributes
 
 preProcess used to: scale, standardize, normalize
 methods
@@ -197,6 +224,67 @@ methods
 5. confusionMatrix
 
 
-not extremely sensitive to scaling: logistic regression and rdm forest
+not extremely sensitive to scaling: logistic regression and random forest
 
 reminder: preProcess on both training & testing
+
+
+# Presentation / Slide-Deck
+ 1. Title
+ 2. Content
+ 3. The Business Problem
+ 4. Data Wrangling
+ 5. EDA: Visualizations
+ 6. EDA: Key Findings
+ 7. EDA: Details
+ 8. Hypothesis Tests
+ 9. Predictive Modeling
+10. Training / Testing / Feature Engineering
+11. Comparisons of Models Tried
+12. Feature Importance
+13. Conclusions / Future Work
+
+```{r}
+#dummyModel <- dummyVars(subscribed~.,data=bankfull_clean)
+#trainData_mat <- predict(dummyModel, newdata = trainData)
+#trainData <- data.frame(trainData_mat)
+```
+
+```{r experimental_rf}
+library(randomForest)
+n <- nrow(bankfull_clean)
+
+rf.train.1 <- bankfull_clean[1:n, c("age", "edu_lvl")]
+rf.label <- as.factor(bankfull_clean$subscribed)
+
+set.seed(1234)
+rf.1 <- randomForest(x=rf.train.1, y=rf.label, importance=TRUE, ntree=500)
+rf.1
+
+varImpPlot(rf.1)
+```
+
+? Naming CodeChunks
+? most subscriptions vs ratio of subscriptions
+? 273-275; unable to identify var names: bankfull %>% filter(subscribed == "yes") %>% select(month)
+? correlation data
+? box plot interpretations
+
+2019-02-19
+? is there a way to display freq/count results in bars for geom_bar
+
+2019-02-26
+? difficulty setting margins in .Rmd, chunk settings w/in Rmd
+
+2019-03-05
+? since duration_sec isn't a real world predictor, i'll have to remove it for the test case
+? removing loan and contacted
+? 1st variables to watch: monthMAR, duration_sec
+? 2nd variables to watch: contact_typeTELEPHONE, prev_outcomeNON
+? 3rd variables to watch: monthJUN, monthAUG, contact_cnt, prev_outcomeSUC
+? 4th variables to watch: mortgageNO, cons_conf_idx
+
+why would the contact_typTELE be of more significance if twice as many cellular 
+
+ifffffffffiiiifdddddf
+ifffffffffiiiifdddddf
