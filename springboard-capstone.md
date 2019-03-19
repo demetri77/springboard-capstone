@@ -30,3 +30,17 @@ This data has been prepared to analyze factors related to readmission as well as
 * Glucose serum test
 * A1c (glucose) test
 
+## Statistics Questions
+
+1) Get going by asking the following questions and looking for the answers with some code and plots:
+
+  1. Can you count something interesting?
+  2. Can you find some trends (high, low, increase, decrease, anomalies)?
+  3. Can you make a bar plot or a histogram?
+  4. Can you compare two related quantities? ?boxplot?
+  5. Can you make a scatterplot?
+  6. Can you make a time-series plot?
+
+2) Having made these plots, what are some insights you get from them? Do you see any correlations? Is there a hypothesis you would like to investigate further? What other questions do they lead you to ask?
+
+http://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3

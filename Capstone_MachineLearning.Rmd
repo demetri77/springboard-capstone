@@ -42,8 +42,11 @@ inTrain <- createDataPartition(y=bankfull_clean$subscribed, p=0.75, list=FALSE)
 trainData <- bankfull_clean[ inTrain,]
 testData  <- bankfull_clean[-inTrain,]
 
-#x = trainData[,]
-#y = trainData$subscribed
+inTrain <- createDataPartition(y=bankfull_mod$subscribed, p=0.75, list=FALSE)
+trainData <- bankfull_mod[ inTrain,]
+testData  <- bankfull_mod[-inTrain,]
+
+
 ```
 
 ## Logistic Regression with CARET
@@ -52,12 +55,34 @@ Develop a model for training data.
 
 ```{r logReg}
 # develop a model
-glm_model_full <- train(subscribed ~ ., data=trainData, method="glmnet", na.action=na.omit)
+glm_model_full <- train(subscribed ~ ., data=trainData, method="glm", na.action=na.omit)
 glm_model_dur <- train(subscribed ~ duration_sec, data=trainData, method="glm", na.action=na.omit)
+
+# model for client data
+glm_model_test <- train(subscribed ~ age + job + marital + edu_lvl, data=trainData, method="glm", na.action=na.omit)
+
+
+glm_model_test <- train(subscribed ~ ., data=trainData, method="glm", na.action=na.omit)
+
+# Variables that cause warning: 
+# prediction from a rank-deficient fit may be misleading
+# edu_lvl, cred_default, 
+
+
 
 #trControl(sampling) //--for later
 
+summary(glm_model_test)
+
 ```
+
+COMPLETELY FILTERED DATASET
+```{r}
+bankfull_mod <- bankfull_clean
+bankfull_mod[c(4:7)] <- list(NULL)
+findLinearCombos(bankfull_mod)
+```
+
 
 What can we conclude from the logistic regression model? 
 
