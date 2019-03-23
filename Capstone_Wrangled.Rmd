@@ -82,9 +82,29 @@ Let's start by reading in the dataset with values delimited by semi-colons along
 with designated column types as indicated by the data dictionary.
 
 ```{r Data_Prep}
-bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "ifffffffffiiiifdddddf")
+bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
+#"ifffffffffiiiifdddddf")
+
+bankfull$job <- as.factor(bankfull$job)
+bankfull$marital <- as.factor(bankfull$marital)
+bankfull$education <- as.factor(bankfull$education)
+bankfull$default <- as.factor(bankfull$default)
+bankfull$housing <- as.factor(bankfull$housing)
+bankfull$loan <- as.factor(bankfull$loan)
+bankfull$contact <- as.factor(bankfull$contact)
+bankfull$month <- as.factor(bankfull$month)
+bankfull$day_of_week <- as.factor(bankfull$day_of_week)
+bankfull$poutcome <- as.factor(bankfull$poutcome)
+bankfull$y <- as.factor(bankfull$y)
+
 summary(bankfull)
 ```
+
+Hypothesis: removing the "unknown" values should help ML later.
+```{r}
+bankfull <- filter(bankfull, default != "unknown" & housing != "unknown" & loan != "unknown")
+```
+
 
 Let's rename variables to be more descriptive and avoid use of periods.
 
@@ -263,7 +283,7 @@ and August* as confirmed by the frequency chart. Winter months *January* and
 *February* are absent from the dataset.
 
 ```{r}
-monthsCampaign <- bankfull %>% filter(subscribed == "yes") %>% select(month)
+monthsCampaign <- bankfull %>% filter(subscribed == "yes") %>% pull(month)
 freq(monthsCampaign)
 ```
 
@@ -411,9 +431,9 @@ For this exploratory data analysis phase, here are a few conclusions:
 1 - More than 50% of subscribers from previous campaign will re-subscribe.
 2 - For clients that do subscribe, twice as many do so via mobile phone than 
   regular telehone.
-2 - Wednesdays are a good day to speak with clients about subscribing.
-3 - It is advised not to contact a client more than 11 times.
-4 - The length of the call should be more than 274 seconds or 4 min, 34 sec.
+X - Wednesdays are a good day to speak with clients about subscribing.
+4 - It is advised not to contact a client more than 11 times.
+5 - The length of the call should be more than 274 seconds or 4 min, 34 sec.
 
 
 _Write the revised dataset into a cleaned-up file._
