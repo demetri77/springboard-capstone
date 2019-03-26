@@ -388,7 +388,6 @@ $(document).ready(function () {
 </div>
 <div id="set-up-model-parameters" class="section level2">
 <h2>Set Up Model Parameters</h2>
-<p>caret::trainControl(method = “cv”, number = 2, classProbs = TRUE)</p>
 <p>Let’s start with partitioning the dataset into a training and test set.</p>
 <pre class="r"><code>set.seed(13456)
 inTrain &lt;- createDataPartition(y=bankfull_clean$subscribed, p=0.75, list=FALSE)
@@ -397,7 +396,9 @@ testData  &lt;- bankfull_clean[-inTrain,]
 
 #inTrainMOD &lt;- createDataPartition(y=bankfull_mod$subscribed, p=0.75, list=FALSE)
 #trainDataMOD &lt;- bankfull_mod[ inTrain,]
-#testDataMOD  &lt;- bankfull_mod[-inTrain,]</code></pre>
+#testDataMOD  &lt;- bankfull_mod[-inTrain,]
+
+#caret::trainControl(method = &quot;cv&quot;, number = 2, classProbs = TRUE)</code></pre>
 </div>
 <div id="logistic-regression-with-caret" class="section level2">
 <h2>Logistic Regression with CARET</h2>

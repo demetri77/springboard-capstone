@@ -23,7 +23,9 @@ banking services.
 
 ```{r}
 bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "ifffffffffiiiifdddddf")
-#bankfull_mod <- bankfull_clean %>% filter(loan = "unknown")
+
+# single value
+bankfull_mod <- filter(bankfull_clean, edu_lvl != "illiterate" & cred_default != "yes")
 #bankfull_mod 
 #bankfull_mod %>% filter(loan == "unknown")
 ```
@@ -35,7 +37,7 @@ for subscribing.
 
 ## Set Up Model Parameters
 
-caret::trainControl(method = "cv", number = 2, classProbs = TRUE)
+
 
 Let's start with partitioning the dataset into a training and test set.
 
@@ -45,10 +47,11 @@ inTrain <- createDataPartition(y=bankfull_clean$subscribed, p=0.75, list=FALSE)
 trainData <- bankfull_clean[ inTrain,]
 testData  <- bankfull_clean[-inTrain,]
 
-#inTrainMOD <- createDataPartition(y=bankfull_mod$subscribed, p=0.75, list=FALSE)
-#trainDataMOD <- bankfull_mod[ inTrain,]
-#testDataMOD  <- bankfull_mod[-inTrain,]
+inTrainMOD <- createDataPartition(y=bankfull_mod$subscribed, p=0.75, list=FALSE)
+trainDataMOD <- bankfull_mod[ inTrain,]
+testDataMOD  <- bankfull_mod[-inTrain,]
 
+#caret::trainControl(method = "cv", number = 2, classProbs = TRUE)
 ```
 
 ## Logistic Regression with CARET
@@ -65,7 +68,7 @@ glm_model_dur <- train(subscribed ~ duration_sec, data=trainData, method="glm", 
 #glm_model_test <- train(subscribed ~ age + job + marital, data=trainData, method="glm", na.action=na.omit)
 
 
-#glm_model_mod <- train(subscribed ~ ., data=trainDataMOD, method="glm", na.action=na.omit)
+glm_model_mod <- train(subscribed ~ ., data=trainDataMOD, method="glm", na.action=na.omit)
 
 # Variables that cause warning: 
 # prediction from a rank-deficient fit may be misleading
@@ -77,7 +80,7 @@ glm_model_dur <- train(subscribed ~ duration_sec, data=trainData, method="glm", 
 summary(glm_model_full)
 summary(glm_model_dur)
 #summary(glm_model_test)
-#summary(glm_model_mod)
+summary(glm_model_mod)
 
 ```
 
