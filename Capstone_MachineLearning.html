@@ -381,30 +381,36 @@ $(document).ready(function () {
 <h2>Trying to predict the success of bank telemarketing</h2>
 <p>I’m trying to predict the success of telemarketing calls for a bank that’s selling long-term deposits. A Portuguese retail bank was addressed, with data collected from 2008 to 2013, thus including the effects of the recent financial crisis of 2008. With 21 features available for analysis, I hope to derive knowledge for a model that would confirm how to better focus resources towards clients with a high chance of agreeing to registering for extra banking services.</p>
 <pre class="r"><code>bankfull_clean &lt;- read_csv(&quot;bankfull_clean.csv&quot;, col_types = &quot;ifffffffffiiiifdddddf&quot;)
-#bankfull_mod &lt;- bankfull_clean %&gt;% filter(loan = &quot;unknown&quot;)
-#bankfull_mod 
-#bankfull_mod %&gt;% filter(loan == &quot;unknown&quot;)</code></pre>
+# &quot;iccccccccciiiicdddddc&quot;
+
+#recode(vector, m=&quot;male&quot;, f=&quot;female&quot;)</code></pre>
 <p>I will be treating this a supervised classification problem. While predicting whether a customer will subscribe to a new service, I need to find the main predictors while developing a model that best expressses a client’s decision for subscribing.</p>
 </div>
 <div id="set-up-model-parameters" class="section level2">
 <h2>Set Up Model Parameters</h2>
-<p>Let’s start with partitioning the dataset into a training and test set.</p>
+<p>Let’s start with partitioning the dataset into a training, validation, and test set.</p>
 <pre class="r"><code>set.seed(13456)
-inTrain &lt;- createDataPartition(y=bankfull_clean$subscribed, p=0.75, list=FALSE)
-trainData &lt;- bankfull_clean[ inTrain,]
-testData  &lt;- bankfull_clean[-inTrain,]
+# Split the full dataset into 80% and 20% partitions
+TrainingValidationIndex &lt;- createDataPartition(y=bankfull_clean$subscribed, p=0.80, list=FALSE)
+training_validation &lt;- bankfull_clean[TrainingValidationIndex,]
 
-#inTrainMOD &lt;- createDataPartition(y=bankfull_mod$subscribed, p=0.75, list=FALSE)
-#trainDataMOD &lt;- bankfull_mod[ inTrain,]
-#testDataMOD  &lt;- bankfull_mod[-inTrain,]
+# Split the main 80% into a Training (75%) and Validation (25%) set
+trainIndex &lt;- createDataPartition(training_validation$subscribed, p=0.75, list=FALSE)
+training &lt;- training_validation[trainIndex,]
+validation &lt;- training_validation[-trainIndex,]
 
-#caret::trainControl(method = &quot;cv&quot;, number = 2, classProbs = TRUE)</code></pre>
+# Original 20% kept aside as Test Data
+testData  &lt;- bankfull_clean[-TrainingValidationIndex,]
+
+#trControl(sampling)
+control &lt;- trainControl(method = &quot;cv&quot;, number = 2, classProbs = TRUE, verboseIter = TRUE)</code></pre>
 </div>
 <div id="logistic-regression-with-caret" class="section level2">
 <h2>Logistic Regression with CARET</h2>
-<p>Develop a model for training data.</p>
+<p>Develop a model with the training data.</p>
 <pre class="r"><code># develop a model
-glm_model_full &lt;- train(subscribed ~ ., data=trainData, method=&quot;glm&quot;, na.action=na.omit)</code></pre>
+set.seed(7)
+glm_model_full &lt;- train(subscribed ~ ., data=training, method=&quot;glm&quot;, na.action=na.omit)</code></pre>
 <pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
 ## ifelse(type == : prediction from a rank-deficient fit may be misleading
 
@@ -479,122 +485,6 @@ glm_model_full &lt;- train(subscribed ~ ., data=trainData, method=&quot;glm&quot
 
 ## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
 ## ifelse(type == : prediction from a rank-deficient fit may be misleading</code></pre>
-<pre class="r"><code>glm_model_dur &lt;- train(subscribed ~ duration_sec, data=trainData, method=&quot;glm&quot;, na.action=na.omit)
-
-# model for client data
-#glm_model_test &lt;- train(subscribed ~ age + job + marital, data=trainData, method=&quot;glm&quot;, na.action=na.omit)
-
-
-#glm_model_mod &lt;- train(subscribed ~ ., data=trainDataMOD, method=&quot;glm&quot;, na.action=na.omit)
-
-# Variables that cause warning: 
-# prediction from a rank-deficient fit may be misleading
-# edu_lvl, cred_default
-# possibly: loan, edu_lvl
-
-#trControl(sampling) //--for later
-
-summary(glm_model_full)</code></pre>
-<pre><code>## 
-## Call:
-## NULL
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -4.6808  -0.3045  -0.1881  -0.1129   2.8963  
-## 
-## Coefficients: (2 not defined because of singularities)
-##                              Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)                -5.029e+01  1.539e+02  -0.327  0.74375    
-## age                         8.977e-03  1.032e-02   0.870  0.38440    
-## jobservices                 5.764e-01  4.055e-01   1.421  0.15517    
-## jobadmin                    4.640e-01  3.628e-01   1.279  0.20088    
-## `jobself-employed`         -5.901e-01  5.865e-01  -1.006  0.31439    
-## jobtechnician               6.100e-01  3.787e-01   1.611  0.10721    
-## jobmanagement               1.814e-01  4.366e-01   0.415  0.67780    
-## jobstudent                  7.587e-01  5.192e-01   1.461  0.14390    
-## jobretired                  3.947e-01  4.988e-01   0.791  0.42878    
-## jobentrepreneur            -1.545e-01  6.634e-01  -0.233  0.81580    
-## jobhousemaid                9.072e-01  5.632e-01   1.611  0.10720    
-## jobunemployed               8.783e-01  5.131e-01   1.712  0.08693 .  
-## jobunknown                 -4.919e-01  9.984e-01  -0.493  0.62225    
-## maritalsingle               2.774e-02  2.152e-01   0.129  0.89742    
-## maritaldivorced            -3.472e-01  3.034e-01  -1.145  0.25234    
-## maritalunknown             -1.815e-02  1.143e+00  -0.016  0.98733    
-## edu_lvlhigh_school         -2.157e-01  3.573e-01  -0.604  0.54609    
-## edu_lvluniversity_degree   -1.290e-02  3.642e-01  -0.035  0.97175    
-## edu_lvlprofessional_course -2.824e-01  3.994e-01  -0.707  0.47947    
-## edu_lvlbasic_4y            -4.614e-01  4.544e-01  -1.015  0.30990    
-## edu_lvlbasic_6y            -3.455e-01  5.787e-01  -0.597  0.55057    
-## edu_lvlunknown             -8.156e-02  4.928e-01  -0.165  0.86856    
-## edu_lvlilliterate                  NA         NA      NA       NA    
-## cred_defaultyes                    NA         NA      NA       NA    
-## mortgageno                  8.402e-03  1.703e-01   0.049  0.96065    
-## loanyes                    -2.458e-01  2.436e-01  -1.009  0.31300    
-## contact_typtelephone       -1.058e+00  3.452e-01  -3.066  0.00217 ** 
-## monthjun                    1.422e+00  5.626e-01   2.528  0.01146 *  
-## monthnov                    3.318e-01  4.299e-01   0.772  0.44024    
-## monthsep                    3.897e-01  6.264e-01   0.622  0.53386    
-## monthjul                    3.906e-01  4.065e-01   0.961  0.33664    
-## monthmar                    2.991e+00  5.440e-01   5.498 3.84e-08 ***
-## monthaug                    7.140e-01  3.897e-01   1.832  0.06689 .  
-## monthoct                    7.789e-01  5.628e-01   1.384  0.16640    
-## monthapr                    6.875e-01  3.724e-01   1.846  0.06486 .  
-## monthdec                    1.237e+00  7.517e-01   1.645  0.09992 .  
-## day_of_weekwed              3.272e-01  2.810e-01   1.165  0.24420    
-## day_of_weekmon              1.946e-01  2.736e-01   0.711  0.47687    
-## day_of_weekthu              2.601e-01  2.694e-01   0.965  0.33430    
-## day_of_weektue              1.555e-01  2.805e-01   0.554  0.57933    
-## duration_sec                5.045e-03  3.289e-04  15.340  &lt; 2e-16 ***
-## contact_cnt                -6.122e-02  5.438e-02  -1.126  0.26018    
-## days_passed                 3.400e-04  8.438e-04   0.403  0.68704    
-## prev_contact_cnt            1.050e-01  1.958e-01   0.536  0.59203    
-## prev_outcomefailure        -3.766e-01  3.412e-01  -1.104  0.26975    
-## prev_outcomesuccess         1.650e+00  8.411e-01   1.962  0.04979 *  
-## emp_var_rate               -3.140e-01  5.689e-01  -0.552  0.58095    
-## cons_price_idx              6.912e-01  1.006e+00   0.687  0.49192    
-## cons_conf_idx               5.095e-02  3.277e-02   1.555  0.12005    
-## euribor3m                  -2.338e-01  5.514e-01  -0.424  0.67157    
-## num_employed               -3.291e-03  1.268e-02  -0.260  0.79516    
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## (Dispersion parameter for binomial family taken to be 1)
-## 
-##     Null deviance: 1799.9  on 2426  degrees of freedom
-## Residual deviance: 1024.5  on 2378  degrees of freedom
-## AIC: 1122.5
-## 
-## Number of Fisher Scoring iterations: 7</code></pre>
-<pre class="r"><code>summary(glm_model_dur)</code></pre>
-<pre><code>## 
-## Call:
-## NULL
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -4.1356  -0.4469  -0.3728  -0.3282   2.4423  
-## 
-## Coefficients:
-##                Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)  -3.1570947  0.1112341  -28.38   &lt;2e-16 ***
-## duration_sec  0.0035992  0.0002395   15.03   &lt;2e-16 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## (Dispersion parameter for binomial family taken to be 1)
-## 
-##     Null deviance: 1799.9  on 2426  degrees of freedom
-## Residual deviance: 1511.8  on 2425  degrees of freedom
-## AIC: 1515.8
-## 
-## Number of Fisher Scoring iterations: 5</code></pre>
-<pre class="r"><code>#summary(glm_model_test)
-#summary(glm_model_mod)</code></pre>
-<p>COMPLETELY FILTERED DATASET</p>
-<pre class="r"><code>#bankfull_mod &lt;- bankfull_clean
-#bankfull_mod[c(4:7)] &lt;- list(NULL)
-#findLinearCombos(bankfull_mod)</code></pre>
 <p>What can we conclude from the logistic regression model?</p>
 <pre class="r"><code>summary(glm_model_full) # results with entire variable set</code></pre>
 <pre><code>## 
@@ -603,163 +493,136 @@ summary(glm_model_full)</code></pre>
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -4.6808  -0.3045  -0.1881  -0.1129   2.8963  
+## -4.8370  -0.3188  -0.1846  -0.1099   2.8562  
 ## 
 ## Coefficients: (2 not defined because of singularities)
 ##                              Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)                -5.029e+01  1.539e+02  -0.327  0.74375    
-## age                         8.977e-03  1.032e-02   0.870  0.38440    
-## jobservices                 5.764e-01  4.055e-01   1.421  0.15517    
-## jobadmin                    4.640e-01  3.628e-01   1.279  0.20088    
-## `jobself-employed`         -5.901e-01  5.865e-01  -1.006  0.31439    
-## jobtechnician               6.100e-01  3.787e-01   1.611  0.10721    
-## jobmanagement               1.814e-01  4.366e-01   0.415  0.67780    
-## jobstudent                  7.587e-01  5.192e-01   1.461  0.14390    
-## jobretired                  3.947e-01  4.988e-01   0.791  0.42878    
-## jobentrepreneur            -1.545e-01  6.634e-01  -0.233  0.81580    
-## jobhousemaid                9.072e-01  5.632e-01   1.611  0.10720    
-## jobunemployed               8.783e-01  5.131e-01   1.712  0.08693 .  
-## jobunknown                 -4.919e-01  9.984e-01  -0.493  0.62225    
-## maritalsingle               2.774e-02  2.152e-01   0.129  0.89742    
-## maritaldivorced            -3.472e-01  3.034e-01  -1.145  0.25234    
-## maritalunknown             -1.815e-02  1.143e+00  -0.016  0.98733    
-## edu_lvlhigh_school         -2.157e-01  3.573e-01  -0.604  0.54609    
-## edu_lvluniversity_degree   -1.290e-02  3.642e-01  -0.035  0.97175    
-## edu_lvlprofessional_course -2.824e-01  3.994e-01  -0.707  0.47947    
-## edu_lvlbasic_4y            -4.614e-01  4.544e-01  -1.015  0.30990    
-## edu_lvlbasic_6y            -3.455e-01  5.787e-01  -0.597  0.55057    
-## edu_lvlunknown             -8.156e-02  4.928e-01  -0.165  0.86856    
+## (Intercept)                -2.003e+02  1.658e+02  -1.208  0.22711    
+## age                         5.707e-03  1.162e-02   0.491  0.62344    
+## jobservices                -3.701e-02  4.498e-01  -0.082  0.93443    
+## jobadmin                   -1.359e-02  3.916e-01  -0.035  0.97232    
+## `jobself-employed`         -1.194e+00  6.842e-01  -1.745  0.08105 .  
+## jobtechnician               2.531e-01  4.016e-01   0.630  0.52859    
+## jobmanagement              -2.316e-01  4.660e-01  -0.497  0.61915    
+## jobstudent                  4.804e-01  5.584e-01   0.860  0.38956    
+## jobretired                  2.942e-02  5.508e-01   0.053  0.95740    
+## jobentrepreneur            -9.422e-01  8.244e-01  -1.143  0.25312    
+## jobhousemaid                6.916e-01  6.303e-01   1.097  0.27254    
+## jobunemployed               4.526e-01  5.977e-01   0.757  0.44892    
+## jobunknown                 -5.497e-01  9.695e-01  -0.567  0.57072    
+## maritalsingle              -1.613e-01  2.444e-01  -0.660  0.50917    
+## maritaldivorced            -2.583e-01  3.210e-01  -0.804  0.42112    
+## maritalunknown              1.398e+00  1.312e+00   1.066  0.28648    
+## edu_lvlhigh_school         -1.406e-01  3.873e-01  -0.363  0.71656    
+## edu_lvluniversity_degree    1.134e-01  3.972e-01   0.286  0.77524    
+## edu_lvlprofessional_course -3.919e-01  4.390e-01  -0.893  0.37201    
+## edu_lvlbasic_4y            -8.126e-01  5.170e-01  -1.572  0.11599    
+## edu_lvlbasic_6y            -3.079e-01  5.799e-01  -0.531  0.59539    
+## edu_lvlunknown              2.638e-01  5.109e-01   0.516  0.60558    
 ## edu_lvlilliterate                  NA         NA      NA       NA    
 ## cred_defaultyes                    NA         NA      NA       NA    
-## mortgageno                  8.402e-03  1.703e-01   0.049  0.96065    
-## loanyes                    -2.458e-01  2.436e-01  -1.009  0.31300    
-## contact_typtelephone       -1.058e+00  3.452e-01  -3.066  0.00217 ** 
-## monthjun                    1.422e+00  5.626e-01   2.528  0.01146 *  
-## monthnov                    3.318e-01  4.299e-01   0.772  0.44024    
-## monthsep                    3.897e-01  6.264e-01   0.622  0.53386    
-## monthjul                    3.906e-01  4.065e-01   0.961  0.33664    
-## monthmar                    2.991e+00  5.440e-01   5.498 3.84e-08 ***
-## monthaug                    7.140e-01  3.897e-01   1.832  0.06689 .  
-## monthoct                    7.789e-01  5.628e-01   1.384  0.16640    
-## monthapr                    6.875e-01  3.724e-01   1.846  0.06486 .  
-## monthdec                    1.237e+00  7.517e-01   1.645  0.09992 .  
-## day_of_weekwed              3.272e-01  2.810e-01   1.165  0.24420    
-## day_of_weekmon              1.946e-01  2.736e-01   0.711  0.47687    
-## day_of_weekthu              2.601e-01  2.694e-01   0.965  0.33430    
-## day_of_weektue              1.555e-01  2.805e-01   0.554  0.57933    
-## duration_sec                5.045e-03  3.289e-04  15.340  &lt; 2e-16 ***
-## contact_cnt                -6.122e-02  5.438e-02  -1.126  0.26018    
-## days_passed                 3.400e-04  8.438e-04   0.403  0.68704    
-## prev_contact_cnt            1.050e-01  1.958e-01   0.536  0.59203    
-## prev_outcomefailure        -3.766e-01  3.412e-01  -1.104  0.26975    
-## prev_outcomesuccess         1.650e+00  8.411e-01   1.962  0.04979 *  
-## emp_var_rate               -3.140e-01  5.689e-01  -0.552  0.58095    
-## cons_price_idx              6.912e-01  1.006e+00   0.687  0.49192    
-## cons_conf_idx               5.095e-02  3.277e-02   1.555  0.12005    
-## euribor3m                  -2.338e-01  5.514e-01  -0.424  0.67157    
-## num_employed               -3.291e-03  1.268e-02  -0.260  0.79516    
+## mortgageno                 -1.355e-02  1.882e-01  -0.072  0.94261    
+## loanyes                    -1.530e-01  2.515e-01  -0.609  0.54282    
+## contact_typtelephone       -1.065e+00  3.740e-01  -2.847  0.00441 ** 
+## monthjun                    7.133e-01  5.926e-01   1.204  0.22871    
+## monthnov                   -5.443e-02  4.839e-01  -0.112  0.91043    
+## monthsep                    7.568e-01  6.776e-01   1.117  0.26400    
+## monthjul                    1.852e-01  4.629e-01   0.400  0.68902    
+## monthmar                    2.981e+00  6.195e-01   4.812  1.5e-06 ***
+## monthaug                    1.115e+00  4.205e-01   2.652  0.00800 ** 
+## monthoct                    8.006e-01  6.016e-01   1.331  0.18327    
+## monthapr                    5.068e-01  3.877e-01   1.307  0.19107    
+## monthdec                    2.021e+00  7.967e-01   2.537  0.01118 *  
+## day_of_weekwed              4.188e-02  2.942e-01   0.142  0.88681    
+## day_of_weekmon             -1.175e-01  2.899e-01  -0.405  0.68536    
+## day_of_weekthu             -2.372e-01  2.882e-01  -0.823  0.41043    
+## day_of_weektue             -1.767e-01  2.966e-01  -0.596  0.55144    
+## duration_sec                4.709e-03  3.623e-04  12.998  &lt; 2e-16 ***
+## contact_cnt                -1.605e-01  7.380e-02  -2.175  0.02966 *  
+## days_passed                 2.910e-04  9.944e-04   0.293  0.76980    
+## prev_contact_cnt            2.281e-02  2.028e-01   0.113  0.91042    
+## prev_outcomefailure        -3.143e-01  3.684e-01  -0.853  0.39360    
+## prev_outcomesuccess         1.324e+00  9.729e-01   1.361  0.17366    
+## emp_var_rate               -1.377e+00  6.028e-01  -2.285  0.02233 *  
+## cons_price_idx              1.889e+00  1.082e+00   1.746  0.08085 .  
+## cons_conf_idx               3.975e-02  3.565e-02   1.115  0.26492    
+## euribor3m                   1.419e-01  6.140e-01   0.231  0.81722    
+## num_employed                3.939e-03  1.377e-02   0.286  0.77480    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 1799.9  on 2426  degrees of freedom
-## Residual deviance: 1024.5  on 2378  degrees of freedom
-## AIC: 1122.5
+##     Null deviance: 1440.84  on 1941  degrees of freedom
+## Residual deviance:  840.04  on 1893  degrees of freedom
+## AIC: 938.04
 ## 
 ## Number of Fisher Scoring iterations: 7</code></pre>
-<pre class="r"><code>summary(glm_model_dur) # results with just variable duration_sec</code></pre>
-<pre><code>## 
-## Call:
-## NULL
-## 
-## Deviance Residuals: 
-##     Min       1Q   Median       3Q      Max  
-## -4.1356  -0.4469  -0.3728  -0.3282   2.4423  
-## 
-## Coefficients:
-##                Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)  -3.1570947  0.1112341  -28.38   &lt;2e-16 ***
-## duration_sec  0.0035992  0.0002395   15.03   &lt;2e-16 ***
-## ---
-## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
-## 
-## (Dispersion parameter for binomial family taken to be 1)
-## 
-##     Null deviance: 1799.9  on 2426  degrees of freedom
-## Residual deviance: 1511.8  on 2425  degrees of freedom
-## AIC: 1515.8
-## 
-## Number of Fisher Scoring iterations: 5</code></pre>
-<pre class="r"><code># remove column &quot;loan&quot; and &quot;contacted&quot;
-#trainData &lt;- subset(trainData, select = c(age:mortgage, contact_typ:subscribed))
-
-#glm_model_mod &lt;- train(subscribed ~ ., data=trainData, method=&quot;glm&quot;, na.action=na.omit)
-
-#summary(glm_model_mod)</code></pre>
-<p>Let’s apply our model to the test set.</p>
-<pre class="r"><code># Which model is best?
-glm_predict_full &lt;- predict(glm_model_full, newdata=testData)</code></pre>
+<p>Let’s apply our model to the validation set.</p>
+<pre class="r"><code>glm_predict_full &lt;- predict(glm_model_full, newdata=validation)</code></pre>
 <pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
 ## ifelse(type == : prediction from a rank-deficient fit may be misleading</code></pre>
-<pre class="r"><code>glm_predict_dur &lt;- predict(glm_model_dur, newdata=testData)
-#glm_prediction &lt;- predict(glm_model_mod, newdata=testData)</code></pre>
 <p>Here is a confusion matrix, with the results expressing accuracy, sensitivity, and specificity.</p>
-<pre class="r"><code>glm_confMatrix &lt;- caret::confusionMatrix(glm_predict_full, testData$subscribed, mode=&quot;everything&quot;) 
+<pre class="r"><code>glm_confMatrix &lt;- caret::confusionMatrix(glm_predict_full, validation$subscribed, mode=&quot;everything&quot;) 
 
 glm_confMatrix</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction  no yes
-##        no  684  60
-##        yes  26  38
-##                                          
-##                Accuracy : 0.8936         
-##                  95% CI : (0.8702, 0.914)
-##     No Information Rate : 0.8787         
-##     P-Value [Acc &gt; NIR] : 0.106144       
-##                                          
-##                   Kappa : 0.4129         
-##  Mcnemar&#39;s Test P-Value : 0.000373       
-##                                          
-##             Sensitivity : 0.9634         
-##             Specificity : 0.3878         
-##          Pos Pred Value : 0.9194         
-##          Neg Pred Value : 0.5938         
-##               Precision : 0.9194         
-##                  Recall : 0.9634         
-##                      F1 : 0.9409         
-##              Prevalence : 0.8787         
-##          Detection Rate : 0.8465         
-##    Detection Prevalence : 0.9208         
-##       Balanced Accuracy : 0.6756         
-##                                          
-##        &#39;Positive&#39; Class : no             
+##        no  557  48
+##        yes  11  31
+##                                           
+##                Accuracy : 0.9088          
+##                  95% CI : (0.8839, 0.9299)
+##     No Information Rate : 0.8779          
+##     P-Value [Acc &gt; NIR] : 0.007786        
+##                                           
+##                   Kappa : 0.4672          
+##  Mcnemar&#39;s Test P-Value : 2.775e-06       
+##                                           
+##             Sensitivity : 0.9806          
+##             Specificity : 0.3924          
+##          Pos Pred Value : 0.9207          
+##          Neg Pred Value : 0.7381          
+##               Precision : 0.9207          
+##                  Recall : 0.9806          
+##                      F1 : 0.9497          
+##              Prevalence : 0.8779          
+##          Detection Rate : 0.8609          
+##    Detection Prevalence : 0.9351          
+##       Balanced Accuracy : 0.6865          
+##                                           
+##        &#39;Positive&#39; Class : no              
 ## </code></pre>
 <pre class="r"><code># use metric parameter; F1 or Kappa
 
 # investigate further parameters (eg F1/accuracy score)
 # Precision = TP / (TP + FP)
-# Recall = TP / (TP + FN)
-# F1 = (1+beta^2)*precision*recall/((beta^2 * precision)+recall)
-# confMatrix$byClass[&quot;F1&quot;]</code></pre>
+# Recall = TP / (TP + FN)</code></pre>
+<p><strong>Comparing results of Logistic Regression model:</strong></p>
+<ul>
+<li>Kappa = 0.4672</li>
+<li>F1 = 0.9497016</li>
+</ul>
 </div>
 <div id="random-forest-with-caret" class="section level2">
 <h2>Random Forest with CARET</h2>
+<p>Develop a model with training data.</p>
 <pre class="r"><code># play with smaller # of rf while playing/testing
-rf_model &lt;- caret::train(subscribed~., data=trainData, method=&quot;rf&quot;,
-                         trControl=trainControl(method=&quot;cv&quot;, number=5))
+set.seed(7)
+rf_model &lt;- caret::train(subscribed~., data=training, method=&quot;rf&quot;,
+                         trControl=trainControl(method=&quot;cv&quot;, number=10))
 
 summary(rf_model)</code></pre>
 <pre><code>##                 Length Class      Mode     
 ## call               4   -none-     call     
 ## type               1   -none-     character
-## predicted       2427   factor     numeric  
+## predicted       1942   factor     numeric  
 ## err.rate        1500   -none-     numeric  
 ## confusion          6   -none-     numeric  
-## votes           4854   matrix     numeric  
-## oob.times       2427   -none-     numeric  
+## votes           3884   matrix     numeric  
+## oob.times       1942   -none-     numeric  
 ## classes            2   -none-     character
 ## importance        50   -none-     numeric  
 ## importanceSD       0   -none-     NULL     
@@ -768,7 +631,7 @@ summary(rf_model)</code></pre>
 ## ntree              1   -none-     numeric  
 ## mtry               1   -none-     numeric  
 ## forest            14   -none-     list     
-## y               2427   factor     numeric  
+## y               1942   factor     numeric  
 ## test               0   -none-     NULL     
 ## inbag              0   -none-     NULL     
 ## xNames            50   -none-     character
@@ -776,39 +639,52 @@ summary(rf_model)</code></pre>
 ## tuneValue          1   data.frame list     
 ## obsLevels          2   -none-     character
 ## param              0   -none-     list</code></pre>
-<pre class="r"><code>rf_prediction &lt;- predict(rf_model, newdata=testData)</code></pre>
-<pre class="r"><code>rf_confMatrix &lt;- caret::confusionMatrix(rf_prediction, testData$subscribed, mode=&quot;everything&quot;)
+<p>Apply the Random Forest model to the Validation set.</p>
+<pre class="r"><code>rf_prediction &lt;- predict(rf_model, newdata=validation)</code></pre>
+<p>Review the Confusion Matrix for the Random Forest model.</p>
+<pre class="r"><code>rf_confMatrix &lt;- caret::confusionMatrix(rf_prediction, validation$subscribed, mode=&quot;everything&quot;)
 
 rf_confMatrix</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction  no yes
-##        no  675  47
-##        yes  35  51
+##        no  548  40
+##        yes  20  39
 ##                                           
-##                Accuracy : 0.8985          
-##                  95% CI : (0.8756, 0.9185)
-##     No Information Rate : 0.8787          
-##     P-Value [Acc &gt; NIR] : 0.04485         
+##                Accuracy : 0.9073          
+##                  95% CI : (0.8822, 0.9285)
+##     No Information Rate : 0.8779          
+##     P-Value [Acc &gt; NIR] : 0.01104         
 ##                                           
-##                   Kappa : 0.4974          
-##  Mcnemar&#39;s Test P-Value : 0.22446         
+##                   Kappa : 0.5145          
+##  Mcnemar&#39;s Test P-Value : 0.01417         
 ##                                           
-##             Sensitivity : 0.9507          
-##             Specificity : 0.5204          
-##          Pos Pred Value : 0.9349          
-##          Neg Pred Value : 0.5930          
-##               Precision : 0.9349          
-##                  Recall : 0.9507          
-##                      F1 : 0.9427          
-##              Prevalence : 0.8787          
-##          Detection Rate : 0.8354          
-##    Detection Prevalence : 0.8936          
-##       Balanced Accuracy : 0.7356          
+##             Sensitivity : 0.9648          
+##             Specificity : 0.4937          
+##          Pos Pred Value : 0.9320          
+##          Neg Pred Value : 0.6610          
+##               Precision : 0.9320          
+##                  Recall : 0.9648          
+##                      F1 : 0.9481          
+##              Prevalence : 0.8779          
+##          Detection Rate : 0.8470          
+##    Detection Prevalence : 0.9088          
+##       Balanced Accuracy : 0.7292          
 ##                                           
 ##        &#39;Positive&#39; Class : no              
 ## </code></pre>
+<p><strong>Comparing results of Random Forest:</strong></p>
+<p>5 FOLDS:</p>
+<ul>
+<li>Kappa = 0.4871</li>
+<li>F1 = 0.9455</li>
+</ul>
+<p>10 FOLDS:</p>
+<ul>
+<li>Kappa = 0.5145</li>
+<li>F1 = 0.9481</li>
+</ul>
 <pre class="r"><code>write_csv(bankfull_clean, path=&quot;bankfull_ml.csv&quot;, col_names=TRUE)</code></pre>
 </div>
 

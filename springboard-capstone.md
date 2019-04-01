@@ -44,3 +44,24 @@ This data has been prepared to analyze factors related to readmission as well as
 2) Having made these plots, what are some insights you get from them? Do you see any correlations? Is there a hypothesis you would like to investigate further? What other questions do they lead you to ask?
 
 http://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3
+
+## Recommendations
+1 - More than 50% of subscribers from previous campaign will re-subscribe.
+2 - Wednesdays are a good day to speak with clients about subscribing.
+3 - 
+
+
+**regularization**
+dplyr::recode factor
+
+one for decision
+one for error reporting
+
+autoML
+
+cross Validation
+
+smote
+
+be careful of "accuracy" when dealing with skewed data
+try kappa before F1

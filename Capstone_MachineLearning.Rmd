@@ -23,11 +23,10 @@ banking services.
 
 ```{r}
 bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "ifffffffffiiiifdddddf")
+# "iccccccccciiiicdddddc"
 
-# single value
-bankfull_mod <- filter(bankfull_clean, edu_lvl != "illiterate" & cred_default != "yes")
-#bankfull_mod 
-#bankfull_mod %>% filter(loan == "unknown")
+#recode(vector, m="male", f="female")
+
 ```
 
 I will be treating this a supervised classification problem. While predicting 
@@ -37,58 +36,36 @@ for subscribing.
 
 ## Set Up Model Parameters
 
-
-
-Let's start with partitioning the dataset into a training and test set.
+Let's start with partitioning the dataset into a training, validation, and 
+test set.
 
 ```{r partition}
 set.seed(13456)
-inTrain <- createDataPartition(y=bankfull_clean$subscribed, p=0.75, list=FALSE)
-trainData <- bankfull_clean[ inTrain,]
-testData  <- bankfull_clean[-inTrain,]
+# Split the full dataset into 80% and 20% partitions
+TrainingValidationIndex <- createDataPartition(y=bankfull_clean$subscribed, p=0.80, list=FALSE)
+training_validation <- bankfull_clean[TrainingValidationIndex,]
 
-inTrainMOD <- createDataPartition(y=bankfull_mod$subscribed, p=0.75, list=FALSE)
-trainDataMOD <- bankfull_mod[ inTrain,]
-testDataMOD  <- bankfull_mod[-inTrain,]
+# Split the main 80% into a Training (75%) and Validation (25%) set
+trainIndex <- createDataPartition(training_validation$subscribed, p=0.75, list=FALSE)
+training <- training_validation[trainIndex,]
+validation <- training_validation[-trainIndex,]
 
-#caret::trainControl(method = "cv", number = 2, classProbs = TRUE)
+# Original 20% kept aside as Test Data
+testData  <- bankfull_clean[-TrainingValidationIndex,]
+
+#trControl(sampling)
+control <- trainControl(method = "cv", number = 2, classProbs = TRUE, verboseIter = TRUE)
 ```
 
 ## Logistic Regression with CARET
 
-Develop a model for training data. 
+Develop a model with the training data. 
 
 ```{r logReg}
 # develop a model
-glm_model_full <- train(subscribed ~ ., data=trainData, method="glm", na.action=na.omit)
+set.seed(7)
+glm_model_full <- train(subscribed ~ ., data=training, method="glm", na.action=na.omit)
 
-glm_model_dur <- train(subscribed ~ duration_sec, data=trainData, method="glm", na.action=na.omit)
-
-# model for client data
-#glm_model_test <- train(subscribed ~ age + job + marital, data=trainData, method="glm", na.action=na.omit)
-
-
-glm_model_mod <- train(subscribed ~ ., data=trainDataMOD, method="glm", na.action=na.omit)
-
-# Variables that cause warning: 
-# prediction from a rank-deficient fit may be misleading
-# edu_lvl, cred_default
-# possibly: loan, edu_lvl
-
-#trControl(sampling) //--for later
-
-summary(glm_model_full)
-summary(glm_model_dur)
-#summary(glm_model_test)
-summary(glm_model_mod)
-
-```
-
-COMPLETELY FILTERED DATASET
-```{r}
-#bankfull_mod <- bankfull_clean
-#bankfull_mod[c(4:7)] <- list(NULL)
-#findLinearCombos(bankfull_mod)
 ```
 
 
@@ -96,31 +73,20 @@ What can we conclude from the logistic regression model?
 
 ```{r}
 summary(glm_model_full) # results with entire variable set
-summary(glm_model_dur) # results with just variable duration_sec
+
 ```
+
+Let's apply our model to the validation set.
 
 ```{r}
-# remove column "loan" and "contacted"
-#trainData <- subset(trainData, select = c(age:mortgage, contact_typ:subscribed))
-
-#glm_model_mod <- train(subscribed ~ ., data=trainData, method="glm", na.action=na.omit)
-
-#summary(glm_model_mod)
+glm_predict_full <- predict(glm_model_full, newdata=validation)
 ```
 
-
-Let's apply our model to the test set.
-```{r}
-# Which model is best?
-glm_predict_full <- predict(glm_model_full, newdata=testData)
-glm_predict_dur <- predict(glm_model_dur, newdata=testData)
-#glm_prediction <- predict(glm_model_mod, newdata=testData)
-```
 
 Here is a confusion matrix, with the results expressing accuracy, sensitivity, 
 and specificity.
 ```{r}
-glm_confMatrix <- caret::confusionMatrix(glm_predict_full, testData$subscribed, mode="everything") 
+glm_confMatrix <- caret::confusionMatrix(glm_predict_full, validation$subscribed, mode="everything") 
 
 glm_confMatrix
 # use metric parameter; F1 or Kappa
@@ -128,32 +94,57 @@ glm_confMatrix
 # investigate further parameters (eg F1/accuracy score)
 # Precision = TP / (TP + FP)
 # Recall = TP / (TP + FN)
-# F1 = (1+beta^2)*precision*recall/((beta^2 * precision)+recall)
-# confMatrix$byClass["F1"]
+
 
 ```
 
+**Comparing results of Logistic Regression model:**
+
+* Kappa = 0.4672
+* F1 = 0.9497016
 
 ## Random Forest with CARET
+
+Develop a model with training data.
+
 ```{r rdmForest}
 # play with smaller # of rf while playing/testing
-rf_model <- caret::train(subscribed~., data=trainData, method="rf",
-                         trControl=trainControl(method="cv", number=5))
+set.seed(7)
+rf_model <- caret::train(subscribed~., data=training, method="rf",
+                         trControl=trainControl(method="cv", number=10))
 
 summary(rf_model)
 
 ```
 
 
-```{r}
-rf_prediction <- predict(rf_model, newdata=testData)
-```
+Apply the Random Forest model to the Validation set.
 
 ```{r}
-rf_confMatrix <- caret::confusionMatrix(rf_prediction, testData$subscribed, mode="everything")
+rf_prediction <- predict(rf_model, newdata=validation)
+```
+
+
+Review the Confusion Matrix for the Random Forest model.
+
+```{r}
+rf_confMatrix <- caret::confusionMatrix(rf_prediction, validation$subscribed, mode="everything")
 
 rf_confMatrix
 ```
+
+**Comparing results of Random Forest:**
+
+5 FOLDS:
+
+* Kappa = 0.4871
+* F1 = 0.9455
+
+10 FOLDS:
+
+* Kappa = 0.5145
+* F1 = 0.9481
+
 
 ```{r}
 write_csv(bankfull_clean, path="bankfull_ml.csv", col_names=TRUE)

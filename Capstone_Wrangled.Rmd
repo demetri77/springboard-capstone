@@ -83,7 +83,6 @@ with designated column types as indicated by the data dictionary.
 
 ```{r Data_Prep}
 bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
-#"ifffffffffiiiifdddddf")
 
 bankfull$job <- as.factor(bankfull$job)
 bankfull$marital <- as.factor(bankfull$marital)
@@ -99,12 +98,6 @@ bankfull$y <- as.factor(bankfull$y)
 
 summary(bankfull)
 ```
-
-Hypothesis: removing the "unknown" values should help ML later.
-```{r}
-bankfull <- filter(bankfull, default != "unknown" & housing != "unknown" & loan != "unknown")
-```
-
 
 Let's rename variables to be more descriptive and avoid use of periods.
 
@@ -167,7 +160,6 @@ The proportion of `no` to `yes` in a table:
 
 ```{r}
 prop.table(table(bankfull$subscribed))
-#bankfull %>% knitr::kable(digits = 2)
 ```
 
 When looking for clients that have subscribed to a previous campaign there are 
@@ -384,11 +376,7 @@ ggpairs(bankfull, columns=16:20, progress=FALSE)
 
 ```
 
-What if I filter out the subscriptions?
-```{r}
-
-```
-
+**What if I filter out the subscriptions?**
 
 Deep correlation between Employee Variation Rate and Euribor at 3 months but 
 doesn't seem like it affects client subscriptions.
@@ -424,8 +412,6 @@ For this exploratory data analysis phase, here are a few conclusions:
 3. It is advised to close a subscription by the 11th contact because there is 
   a strong chance of rejection.
 4. The length of the call should be more than 274 seconds or 4 min, 34 sec.
-
-X. Wednesdays are a good day to speak with clients about subscribing.
 
 _Write the revised dataset into a cleaned-up file._
 
