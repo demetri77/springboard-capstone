@@ -25,8 +25,6 @@ banking services.
 bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "ifffffffffiiiifdddddf")
 # "iccccccccciiiicdddddc"
 
-#recode(vector, m="male", f="female")
-
 ```
 
 I will be treating this a supervised classification problem. While predicting 
@@ -65,7 +63,6 @@ Develop a model with the training data.
 # develop a model
 set.seed(7)
 glm_model_full <- train(subscribed ~ ., data=training, method="glm", na.action=na.omit)
-
 ```
 
 
@@ -73,7 +70,6 @@ What can we conclude from the logistic regression model?
 
 ```{r}
 summary(glm_model_full) # results with entire variable set
-
 ```
 
 Let's apply our model to the validation set.
@@ -94,8 +90,6 @@ glm_confMatrix
 # investigate further parameters (eg F1/accuracy score)
 # Precision = TP / (TP + FP)
 # Recall = TP / (TP + FN)
-
-
 ```
 
 **Comparing results of Logistic Regression model:**
@@ -114,7 +108,6 @@ rf_model <- caret::train(subscribed~., data=training, method="rf",
                          trControl=trainControl(method="cv", number=10))
 
 summary(rf_model)
-
 ```
 
 
