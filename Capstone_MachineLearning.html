@@ -381,9 +381,7 @@ $(document).ready(function () {
 <h2>Trying to predict the success of bank telemarketing</h2>
 <p>I’m trying to predict the success of telemarketing calls for a bank that’s selling long-term deposits. A Portuguese retail bank was addressed, with data collected from 2008 to 2013, thus including the effects of the recent financial crisis of 2008. With 21 features available for analysis, I hope to derive knowledge for a model that would confirm how to better focus resources towards clients with a high chance of agreeing to registering for extra banking services.</p>
 <pre class="r"><code>bankfull_clean &lt;- read_csv(&quot;bankfull_clean.csv&quot;, col_types = &quot;ifffffffffiiiifdddddf&quot;)
-# &quot;iccccccccciiiicdddddc&quot;
-
-#recode(vector, m=&quot;male&quot;, f=&quot;female&quot;)</code></pre>
+# &quot;iccccccccciiiicdddddc&quot;</code></pre>
 <p>I will be treating this a supervised classification problem. While predicting whether a customer will subscribe to a new service, I need to find the main predictors while developing a model that best expressses a client’s decision for subscribing.</p>
 </div>
 <div id="set-up-model-parameters" class="section level2">
@@ -410,200 +408,127 @@ control &lt;- trainControl(method = &quot;cv&quot;, number = 2, classProbs = TRU
 <p>Develop a model with the training data.</p>
 <pre class="r"><code># develop a model
 set.seed(7)
-glm_model_full &lt;- train(subscribed ~ ., data=training, method=&quot;glm&quot;, na.action=na.omit)</code></pre>
-<pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading
-
-## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
-## ifelse(type == : prediction from a rank-deficient fit may be misleading</code></pre>
+glm_model_full &lt;- train(subscribed ~ . - duration_sec, data=training, method=&quot;glm&quot;, na.action=na.omit, metric=&quot;Kappa&quot;)</code></pre>
 <p>What can we conclude from the logistic regression model?</p>
-<pre class="r"><code>summary(glm_model_full) # results with entire variable set</code></pre>
+<pre class="r"><code>summary(glm_model_full) # results with entire variable set minus the duration of last call</code></pre>
 <pre><code>## 
 ## Call:
 ## NULL
 ## 
 ## Deviance Residuals: 
 ##     Min       1Q   Median       3Q      Max  
-## -4.8370  -0.3188  -0.1846  -0.1099   2.8562  
+## -2.1629  -0.3956  -0.3112  -0.2311   3.0020  
 ## 
 ## Coefficients: (2 not defined because of singularities)
 ##                              Estimate Std. Error z value Pr(&gt;|z|)    
-## (Intercept)                -2.003e+02  1.658e+02  -1.208  0.22711    
-## age                         5.707e-03  1.162e-02   0.491  0.62344    
-## jobservices                -3.701e-02  4.498e-01  -0.082  0.93443    
-## jobadmin                   -1.359e-02  3.916e-01  -0.035  0.97232    
-## `jobself-employed`         -1.194e+00  6.842e-01  -1.745  0.08105 .  
-## jobtechnician               2.531e-01  4.016e-01   0.630  0.52859    
-## jobmanagement              -2.316e-01  4.660e-01  -0.497  0.61915    
-## jobstudent                  4.804e-01  5.584e-01   0.860  0.38956    
-## jobretired                  2.942e-02  5.508e-01   0.053  0.95740    
-## jobentrepreneur            -9.422e-01  8.244e-01  -1.143  0.25312    
-## jobhousemaid                6.916e-01  6.303e-01   1.097  0.27254    
-## jobunemployed               4.526e-01  5.977e-01   0.757  0.44892    
-## jobunknown                 -5.497e-01  9.695e-01  -0.567  0.57072    
-## maritalsingle              -1.613e-01  2.444e-01  -0.660  0.50917    
-## maritaldivorced            -2.583e-01  3.210e-01  -0.804  0.42112    
-## maritalunknown              1.398e+00  1.312e+00   1.066  0.28648    
-## edu_lvlhigh_school         -1.406e-01  3.873e-01  -0.363  0.71656    
-## edu_lvluniversity_degree    1.134e-01  3.972e-01   0.286  0.77524    
-## edu_lvlprofessional_course -3.919e-01  4.390e-01  -0.893  0.37201    
-## edu_lvlbasic_4y            -8.126e-01  5.170e-01  -1.572  0.11599    
-## edu_lvlbasic_6y            -3.079e-01  5.799e-01  -0.531  0.59539    
-## edu_lvlunknown              2.638e-01  5.109e-01   0.516  0.60558    
-## edu_lvlilliterate                  NA         NA      NA       NA    
+## (Intercept)                -2.414e+02  1.389e+02  -1.737  0.08235 .  
+## age                         1.353e-02  9.048e-03   1.495  0.13486    
+## jobservices                 7.082e-02  3.626e-01   0.195  0.84514    
+## jobadmin                    6.468e-01  3.008e-01   2.151  0.03151 *  
+## jobentrepreneur             1.411e-01  5.268e-01   0.268  0.78883    
+## `jobself-employed`         -2.344e-01  4.879e-01  -0.480  0.63101    
+## jobtechnician               4.945e-01  3.181e-01   1.555  0.12003    
+## jobmanagement              -3.768e-01  4.322e-01  -0.872  0.38331    
+## jobstudent                  3.116e-01  4.888e-01   0.638  0.52376    
+## jobretired                 -1.759e-01  4.559e-01  -0.386  0.69957    
+## jobhousemaid                6.376e-01  4.782e-01   1.333  0.18244    
+## jobunemployed               1.572e-01  4.962e-01   0.317  0.75144    
+## jobunknown                 -2.383e-01  9.433e-01  -0.253  0.80054    
+## maritalsingle               1.416e-01  1.901e-01   0.745  0.45644    
+## maritaldivorced            -1.028e-01  2.690e-01  -0.382  0.70241    
+## maritalunknown             -1.348e+01  5.197e+02  -0.026  0.97931    
+## edu_lvlhigh_school          9.596e-02  3.101e-01   0.309  0.75701    
+## edu_lvluniversity_degree    8.652e-02  3.176e-01   0.272  0.78527    
+## edu_lvlprofessional_course  2.468e-01  3.456e-01   0.714  0.47519    
+## edu_lvlbasic_6y             7.894e-02  4.438e-01   0.178  0.85881    
+## edu_lvlbasic_4y             2.567e-01  3.611e-01   0.711  0.47721    
+## edu_lvlunknown              1.056e-01  4.383e-01   0.241  0.80964    
+## edu_lvlilliterate          -1.345e+01  1.455e+03  -0.009  0.99262    
+## cred_defaultunknown        -2.887e-01  2.589e-01  -1.115  0.26489    
 ## cred_defaultyes                    NA         NA      NA       NA    
-## mortgageno                 -1.355e-02  1.882e-01  -0.072  0.94261    
-## loanyes                    -1.530e-01  2.515e-01  -0.609  0.54282    
-## contact_typtelephone       -1.065e+00  3.740e-01  -2.847  0.00441 ** 
-## monthjun                    7.133e-01  5.926e-01   1.204  0.22871    
-## monthnov                   -5.443e-02  4.839e-01  -0.112  0.91043    
-## monthsep                    7.568e-01  6.776e-01   1.117  0.26400    
-## monthjul                    1.852e-01  4.629e-01   0.400  0.68902    
-## monthmar                    2.981e+00  6.195e-01   4.812  1.5e-06 ***
-## monthaug                    1.115e+00  4.205e-01   2.652  0.00800 ** 
-## monthoct                    8.006e-01  6.016e-01   1.331  0.18327    
-## monthapr                    5.068e-01  3.877e-01   1.307  0.19107    
-## monthdec                    2.021e+00  7.967e-01   2.537  0.01118 *  
-## day_of_weekwed              4.188e-02  2.942e-01   0.142  0.88681    
-## day_of_weekmon             -1.175e-01  2.899e-01  -0.405  0.68536    
-## day_of_weekthu             -2.372e-01  2.882e-01  -0.823  0.41043    
-## day_of_weektue             -1.767e-01  2.966e-01  -0.596  0.55144    
-## duration_sec                4.709e-03  3.623e-04  12.998  &lt; 2e-16 ***
-## contact_cnt                -1.605e-01  7.380e-02  -2.175  0.02966 *  
-## days_passed                 2.910e-04  9.944e-04   0.293  0.76980    
-## prev_contact_cnt            2.281e-02  2.028e-01   0.113  0.91042    
-## prev_outcomefailure        -3.143e-01  3.684e-01  -0.853  0.39360    
-## prev_outcomesuccess         1.324e+00  9.729e-01   1.361  0.17366    
-## emp_var_rate               -1.377e+00  6.028e-01  -2.285  0.02233 *  
-## cons_price_idx              1.889e+00  1.082e+00   1.746  0.08085 .  
-## cons_conf_idx               3.975e-02  3.565e-02   1.115  0.26492    
-## euribor3m                   1.419e-01  6.140e-01   0.231  0.81722    
-## num_employed                3.939e-03  1.377e-02   0.286  0.77480    
+## mortgageno                 -9.271e-02  1.554e-01  -0.597  0.55076    
+## mortgageunknown             7.206e-03  5.422e-01   0.013  0.98940    
+## loanunknown                        NA         NA      NA       NA    
+## loanyes                    -1.449e-01  2.115e-01  -0.685  0.49326    
+## contact_typtelephone       -1.419e+00  3.252e-01  -4.365 1.27e-05 ***
+## monthjun                    2.218e-01  5.305e-01   0.418  0.67586    
+## monthnov                   -5.624e-01  3.818e-01  -1.473  0.14073    
+## monthsep                    1.947e-01  5.763e-01   0.338  0.73550    
+## monthjul                   -2.172e-01  3.600e-01  -0.603  0.54624    
+## monthaug                    2.717e-01  3.464e-01   0.784  0.43292    
+## monthmar                    1.853e+00  4.981e-01   3.719  0.00020 ***
+## monthoct                   -2.074e-01  5.047e-01  -0.411  0.68116    
+## monthapr                    7.473e-02  3.291e-01   0.227  0.82039    
+## monthdec                    6.508e-01  6.696e-01   0.972  0.33114    
+## day_of_weekwed              1.137e-01  2.479e-01   0.459  0.64651    
+## day_of_weekmon              7.451e-02  2.364e-01   0.315  0.75263    
+## day_of_weekthu             -5.985e-03  2.400e-01  -0.025  0.98011    
+## day_of_weektue             -1.086e-01  2.481e-01  -0.438  0.66170    
+## contact_cnt                -6.358e-02  4.470e-02  -1.422  0.15494    
+## days_passed                -7.139e-04  8.134e-04  -0.878  0.38009    
+## prev_contact_cnt           -5.164e-05  2.065e-01   0.000  0.99980    
+## prev_outcomefailure        -3.630e-01  3.512e-01  -1.034  0.30135    
+## prev_outcomesuccess         7.872e-01  8.055e-01   0.977  0.32841    
+## emp_var_rate               -1.526e+00  5.169e-01  -2.952  0.00315 ** 
+## cons_price_idx              2.286e+00  9.171e-01   2.493  0.01266 *  
+## cons_conf_idx               4.393e-02  2.980e-02   1.474  0.14045    
+## euribor3m                   3.633e-01  4.685e-01   0.776  0.43802    
+## num_employed                5.018e-03  1.126e-02   0.446  0.65577    
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
 ## 
 ## (Dispersion parameter for binomial family taken to be 1)
 ## 
-##     Null deviance: 1440.84  on 1941  degrees of freedom
-## Residual deviance:  840.04  on 1893  degrees of freedom
-## AIC: 938.04
+##     Null deviance: 1709.6  on 2472  degrees of freedom
+## Residual deviance: 1292.6  on 2422  degrees of freedom
+## AIC: 1394.6
 ## 
-## Number of Fisher Scoring iterations: 7</code></pre>
+## Number of Fisher Scoring iterations: 14</code></pre>
 <p>Let’s apply our model to the validation set.</p>
-<pre class="r"><code>glm_predict_full &lt;- predict(glm_model_full, newdata=validation)</code></pre>
+<pre class="r"><code>set.seed(7)
+glm_predict_full &lt;- predict(glm_model_full, newdata=validation)</code></pre>
 <pre><code>## Warning in predict.lm(object, newdata, se.fit, scale = 1, type =
 ## ifelse(type == : prediction from a rank-deficient fit may be misleading</code></pre>
 <p>Here is a confusion matrix, with the results expressing accuracy, sensitivity, and specificity.</p>
-<pre class="r"><code>glm_confMatrix &lt;- caret::confusionMatrix(glm_predict_full, validation$subscribed, mode=&quot;everything&quot;) 
-
-glm_confMatrix</code></pre>
+<pre class="r"><code>caret::confusionMatrix(glm_predict_full, validation$subscribed, mode=&quot;everything&quot;, positive=&quot;yes&quot;) </code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction  no yes
-##        no  557  48
-##        yes  11  31
+##        no  714  69
+##        yes  19  21
 ##                                           
-##                Accuracy : 0.9088          
-##                  95% CI : (0.8839, 0.9299)
-##     No Information Rate : 0.8779          
-##     P-Value [Acc &gt; NIR] : 0.007786        
+##                Accuracy : 0.8931          
+##                  95% CI : (0.8699, 0.9134)
+##     No Information Rate : 0.8906          
+##     P-Value [Acc &gt; NIR] : 0.4391          
 ##                                           
-##                   Kappa : 0.4672          
-##  Mcnemar&#39;s Test P-Value : 2.775e-06       
+##                   Kappa : 0.2742          
+##  Mcnemar&#39;s Test P-Value : 1.757e-07       
 ##                                           
-##             Sensitivity : 0.9806          
-##             Specificity : 0.3924          
-##          Pos Pred Value : 0.9207          
-##          Neg Pred Value : 0.7381          
-##               Precision : 0.9207          
-##                  Recall : 0.9806          
-##                      F1 : 0.9497          
-##              Prevalence : 0.8779          
-##          Detection Rate : 0.8609          
-##    Detection Prevalence : 0.9351          
-##       Balanced Accuracy : 0.6865          
+##             Sensitivity : 0.23333         
+##             Specificity : 0.97408         
+##          Pos Pred Value : 0.52500         
+##          Neg Pred Value : 0.91188         
+##               Precision : 0.52500         
+##                  Recall : 0.23333         
+##                      F1 : 0.32308         
+##              Prevalence : 0.10936         
+##          Detection Rate : 0.02552         
+##    Detection Prevalence : 0.04860         
+##       Balanced Accuracy : 0.60371         
 ##                                           
-##        &#39;Positive&#39; Class : no              
+##        &#39;Positive&#39; Class : yes             
 ## </code></pre>
-<pre class="r"><code># use metric parameter; F1 or Kappa
+<pre class="r"><code># use metric parameter Kappa because it&#39;s better than F1 for uneven results.
 
 # investigate further parameters (eg F1/accuracy score)
 # Precision = TP / (TP + FP)
 # Recall = TP / (TP + FN)</code></pre>
 <p><strong>Comparing results of Logistic Regression model:</strong></p>
 <ul>
-<li>Kappa = 0.4672</li>
-<li>F1 = 0.9497016</li>
+<li>Kappa = 0.2742</li>
+<li>F1 = 0.32308</li>
 </ul>
 </div>
 <div id="random-forest-with-caret" class="section level2">
@@ -611,81 +536,118 @@ glm_confMatrix</code></pre>
 <p>Develop a model with training data.</p>
 <pre class="r"><code># play with smaller # of rf while playing/testing
 set.seed(7)
-rf_model &lt;- caret::train(subscribed~., data=training, method=&quot;rf&quot;,
+rf_model &lt;- caret::train(subscribed~.-duration_sec, data=training, method=&quot;rf&quot;, metric=&quot;Kappa&quot;, 
                          trControl=trainControl(method=&quot;cv&quot;, number=10))
 
 summary(rf_model)</code></pre>
 <pre><code>##                 Length Class      Mode     
 ## call               4   -none-     call     
 ## type               1   -none-     character
-## predicted       1942   factor     numeric  
+## predicted       2473   factor     numeric  
 ## err.rate        1500   -none-     numeric  
 ## confusion          6   -none-     numeric  
-## votes           3884   matrix     numeric  
-## oob.times       1942   -none-     numeric  
+## votes           4946   matrix     numeric  
+## oob.times       2473   -none-     numeric  
 ## classes            2   -none-     character
-## importance        50   -none-     numeric  
+## importance        52   -none-     numeric  
 ## importanceSD       0   -none-     NULL     
 ## localImportance    0   -none-     NULL     
 ## proximity          0   -none-     NULL     
 ## ntree              1   -none-     numeric  
 ## mtry               1   -none-     numeric  
 ## forest            14   -none-     list     
-## y               1942   factor     numeric  
+## y               2473   factor     numeric  
 ## test               0   -none-     NULL     
 ## inbag              0   -none-     NULL     
-## xNames            50   -none-     character
+## xNames            52   -none-     character
 ## problemType        1   -none-     character
 ## tuneValue          1   data.frame list     
 ## obsLevels          2   -none-     character
 ## param              0   -none-     list</code></pre>
 <p>Apply the Random Forest model to the Validation set.</p>
-<pre class="r"><code>rf_prediction &lt;- predict(rf_model, newdata=validation)</code></pre>
+<pre class="r"><code>set.seed(7)
+rf_prediction &lt;- predict(rf_model, newdata=validation)</code></pre>
 <p>Review the Confusion Matrix for the Random Forest model.</p>
-<pre class="r"><code>rf_confMatrix &lt;- caret::confusionMatrix(rf_prediction, validation$subscribed, mode=&quot;everything&quot;)
-
-rf_confMatrix</code></pre>
+<pre class="r"><code>caret::confusionMatrix(rf_prediction, validation$subscribed, mode=&quot;everything&quot;, positive=&quot;yes&quot;)</code></pre>
 <pre><code>## Confusion Matrix and Statistics
 ## 
 ##           Reference
 ## Prediction  no yes
-##        no  548  40
-##        yes  20  39
+##        no  709  64
+##        yes  24  26
 ##                                           
-##                Accuracy : 0.9073          
-##                  95% CI : (0.8822, 0.9285)
-##     No Information Rate : 0.8779          
-##     P-Value [Acc &gt; NIR] : 0.01104         
+##                Accuracy : 0.8931          
+##                  95% CI : (0.8699, 0.9134)
+##     No Information Rate : 0.8906          
+##     P-Value [Acc &gt; NIR] : 0.4391          
 ##                                           
-##                   Kappa : 0.5145          
-##  Mcnemar&#39;s Test P-Value : 0.01417         
+##                   Kappa : 0.3182          
+##  Mcnemar&#39;s Test P-Value : 3.219e-05       
 ##                                           
-##             Sensitivity : 0.9648          
-##             Specificity : 0.4937          
-##          Pos Pred Value : 0.9320          
-##          Neg Pred Value : 0.6610          
-##               Precision : 0.9320          
-##                  Recall : 0.9648          
-##                      F1 : 0.9481          
-##              Prevalence : 0.8779          
-##          Detection Rate : 0.8470          
-##    Detection Prevalence : 0.9088          
-##       Balanced Accuracy : 0.7292          
+##             Sensitivity : 0.28889         
+##             Specificity : 0.96726         
+##          Pos Pred Value : 0.52000         
+##          Neg Pred Value : 0.91721         
+##               Precision : 0.52000         
+##                  Recall : 0.28889         
+##                      F1 : 0.37143         
+##              Prevalence : 0.10936         
+##          Detection Rate : 0.03159         
+##    Detection Prevalence : 0.06075         
+##       Balanced Accuracy : 0.62807         
 ##                                           
-##        &#39;Positive&#39; Class : no              
+##        &#39;Positive&#39; Class : yes             
 ## </code></pre>
 <p><strong>Comparing results of Random Forest:</strong></p>
-<p>5 FOLDS:</p>
-<ul>
-<li>Kappa = 0.4871</li>
-<li>F1 = 0.9455</li>
-</ul>
 <p>10 FOLDS:</p>
 <ul>
 <li>Kappa = 0.5145</li>
 <li>F1 = 0.9481</li>
 </ul>
-<pre class="r"><code>write_csv(bankfull_clean, path=&quot;bankfull_ml.csv&quot;, col_names=TRUE)</code></pre>
+<p>10 FOLDS (updated):</p>
+<ul>
+<li>Kappa = 0.3182</li>
+<li>F1 = 0.37143</li>
+</ul>
+<p>Because the Kappa value for the Random Forest model is higher than the Logistic Regression model, let’s choose the Random Forest model for the final prediction with the test data.</p>
+<pre class="r"><code>set.seed(7)
+predict_testData &lt;- predict(rf_model, newdata=testData)
+caret::confusionMatrix(predict_testData, testData$subscribed, mode=&quot;everything&quot;, positive=&quot;yes&quot;)</code></pre>
+<pre><code>## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction  no yes
+##        no  716  59
+##        yes  17  31
+##                                           
+##                Accuracy : 0.9077          
+##                  95% CI : (0.8858, 0.9266)
+##     No Information Rate : 0.8906          
+##     P-Value [Acc &gt; NIR] : 0.06323         
+##                                           
+##                   Kappa : 0.4039          
+##  Mcnemar&#39;s Test P-Value : 2.563e-06       
+##                                           
+##             Sensitivity : 0.34444         
+##             Specificity : 0.97681         
+##          Pos Pred Value : 0.64583         
+##          Neg Pred Value : 0.92387         
+##               Precision : 0.64583         
+##                  Recall : 0.34444         
+##                      F1 : 0.44928         
+##              Prevalence : 0.10936         
+##          Detection Rate : 0.03767         
+##    Detection Prevalence : 0.05832         
+##       Balanced Accuracy : 0.66063         
+##                                           
+##        &#39;Positive&#39; Class : yes             
+## </code></pre>
+<p><strong>Confirming against Test Data</strong></p>
+<ul>
+<li>Kappa = 0.4039</li>
+<li>F1 = 0.44928</li>
+</ul>
+<p>The Kappa score is higher with the test data than the training or validation set. With the test data, the positive predictive value claims this model will be correct 64.583% of the time and incorrect 35.417% of the time.</p>
 </div>
 
 

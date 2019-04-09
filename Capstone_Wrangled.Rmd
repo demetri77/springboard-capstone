@@ -7,7 +7,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 library(tidyverse)
-library(ggplot2)
 library(GGally)
 library(summarytools)
 knitr::opts_chunk$set(echo = TRUE)
@@ -122,6 +121,7 @@ the dependent variable `y` to `subscribed`, which is more descriptive.
 
 ```{r}
 bankfull <- rename(bankfull, subscribed = y)
+#bankfull$subscribed <- factor(bankfull$subscribed, levels = c("yes", "no"))
 ```
 
 Replace all periods ('.') in values with underscores ('_') for legibility.
@@ -392,6 +392,10 @@ Euribor reiterates the correlation.
 ggplot(bankfull, aes(x=emp_var_rate, y=euribor3m)) + 
   geom_point(aes(color = factor(subscribed)), alpha = 0.50, position="jitter") + 
   labs(title = "Euribor (3 months) vs Employment Variation Rate (quarterly)")
+
+ggplot(bankfull, aes(x=cons_conf_idx, y=cons_price_idx)) + 
+  geom_point(aes(color=factor(subscribed), shape=factor(subscribed)), alpha=0.50, position="jitter") + 
+  labs(title = "Consumer Price Index vs Consumer Confidence Index")
 ```
 
 Using box-plots used for the employment variable rate and the 3 month Euribor 
