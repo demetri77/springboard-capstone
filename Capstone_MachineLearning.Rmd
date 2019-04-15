@@ -131,6 +131,7 @@ caret::confusionMatrix(rf_prediction, validation$subscribed, mode="everything", 
 10 FOLDS:
 
 * Kappa = 0.3182
+* Kappa = 0.3308
 
 Because the Kappa value for the Random Forest model is higher than the Logistic 
 Regression model, let's choose the Random Forest model for the final prediction 
@@ -144,6 +145,7 @@ caret::confusionMatrix(predict_testData, testData$subscribed, mode="everything",
 **Confirming against Test Data**
 
 * Kappa = 0.4039
+* Kappa = 0.3194 (updated)
 
 The Kappa score is higher with the test data than the training or validation 
 set. With the test data, the positive predictive value claims this model will 
