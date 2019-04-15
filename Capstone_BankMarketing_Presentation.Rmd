@@ -49,8 +49,8 @@ The attribute of interest, `subscribed` will indicate a successful subscription 
 
 ## Exploratory Data Analysis
 
-**At first glance there is an overwhelming amount of clients who choose not to 
-subscribe to a term deposit.**
+At first glance there is an overwhelming amount of clients who choose not to 
+subscribe to a term deposit.
 
 ```{r subscribed}
 ggplot(bankfull, aes(x = subscribed, fill = subscribed)) + geom_bar() + 
@@ -61,8 +61,8 @@ ggplot(bankfull, aes(x = subscribed, fill = subscribed)) + geom_bar() +
 
 ## Exploratory Data Analysis
 
-**But looking at subscriptions from a previous campaign tells us more than 
-half the subscribers will re-subscribe.**
+But looking at subscriptions from a previous campaign tells us more than 
+half the subscribers will re-subscribe.
 
 ```{r prev_outcome}
 bankfull_prev <- filter(bankfull, prev_outcome != "nonexistent")
@@ -75,7 +75,8 @@ ggplot(bankfull_prev, aes(x=prev_outcome, fill=subscribed)) +
 
 ## Contact Type
 
-**It was also observed that contacting clients via cellular phone yields 2 times more success than reaching out to a client's landline telephone.**
+It was also observed contacting clients via cellular phone yields at least 2 
+times more success than contacting a client's landline telephone.
 
 ```{r contact_typ}
 ggplot(bankfull, aes(x=contact_typ, fill=subscribed)) + 
@@ -87,8 +88,8 @@ ggplot(bankfull, aes(x=contact_typ, fill=subscribed)) +
 
 ## Employment Variation Rate
 
-**Logistic Regression indicates there is fair chance of success when the 
-Employment Variation Rate is -1.8.**
+Logistic Regression indicates there is fair chance of success when the 
+Employment Variation Rate is -1.8.
 
 ```{r emp_var_rate}
 ggplot(bankfull, aes(x=subscribed, y=emp_var_rate, fill=subscribed)) +
