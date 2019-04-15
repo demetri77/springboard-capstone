@@ -286,5 +286,26 @@ varImpPlot(rf.1)
 
 why would the contact_typTELE be of more significance if twice as many cellular 
 
-ifffffffffiiiifdddddf
-ifffffffffiiiifdddddf
+
+2019-03-19
+? - What is ETL? Explore, Transform, Load (e.g. Microsoft SSI services; r::read_delim, column renames)
+? - How can I see what's the data for month/day/subscribed? my ctable shows MONDAYS in MAY
+? - glm vs glmnet
+? - R * prediction from a rank-deficient fit may be misleading
+
+2019-04-02
+? - develop null hypothesis; 
+
+Kappa FTW for unbalanced datasets
+looking for the optimal # of "folds"
+don't forget to compute the error on the test dataset
+conclude with model of choice
+for Presentation: 
+* Problem description
+* select 2-3 insightful plots/graphs from EDA
+* ML
+* recommendations
+
+#TidyTuesday
+
+? - set.seed(), everytime there's a RNG, correct?

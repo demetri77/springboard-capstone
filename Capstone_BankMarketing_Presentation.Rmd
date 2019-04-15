@@ -1,0 +1,134 @@
+---
+title: "Bank Marketing Success"
+author: "Demetri Lee"
+date: "09-APR-2019"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(summarytools)
+
+#bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
+bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "ifffffffffiiiifdddddf")
+
+colnames(bankfull) <- c("age", "job", "marital", "edu_lvl", "cred_default", "mortgage", "loan",
+                        "contact_typ", "month", "day_of_week", "duration_sec", 
+                        "contact_cnt", "days_passed", "prev_contact_cnt", "prev_outcome",
+                        "emp_var_rate", "cons_price_idx", "cons_conf_idx", "euribor3m", "num_employed",
+                        "subscribed")
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Introduction
+
+A Portuguese bank uses telemarketing campaigns to engage their clients.
+
+Each client engagement has been recorded for evaluation.
+
+Such data can be used to extract insight for making better campaign decisions.
+
+
+## Objective
+
+Marketing campaigns generally do not discriminite which clients are targeted.
+
+As such, unneccessary resources may be spent on clients that lead to rejection. 
+
+The goal is to predict whether a client will subscribe to a term deposit.
+
+
+## Data
+
+Interactions for over 41,000 clients were recorded from May-2008 to Nov-2010.
+
+Each record contains 21 different attributes for evaluation.
+
+The attribute of interest, `subscribed` will indicate a successful subscription from a client.
+
+
+## Exploratory Data Analysis
+
+**At first glance there is an overwhelming amount of clients who choose not to 
+subscribe to a term deposit.**
+
+```{r subscribed}
+ggplot(bankfull, aes(x = subscribed, fill = subscribed)) + geom_bar() + 
+  xlab("subscribed") + 
+  ylab("count")
+```
+
+
+## Exploratory Data Analysis
+
+**But looking at subscriptions from a previous campaign tells us more than 
+half the subscribers will re-subscribe.**
+
+```{r prev_outcome}
+bankfull_prev <- filter(bankfull, prev_outcome != "nonexistent")
+ggplot(bankfull_prev, aes(x=prev_outcome, fill=subscribed)) + 
+  geom_bar(position="fill") + 
+  xlab("previous campaign") + 
+  ylab("ratio")
+```
+
+
+## Contact Type
+
+**It was also observed that contacting clients via cellular phone yields 2 times more success than reaching out to a client's landline telephone.**
+
+```{r contact_typ}
+ggplot(bankfull, aes(x=contact_typ, fill=subscribed)) + 
+  geom_bar(position="fill") + 
+  xlab("method of contact") + 
+  ylab("count")
+```
+
+
+## Employment Variation Rate
+
+**Logistic Regression indicates there is fair chance of success when the 
+Employment Variation Rate is -1.8.**
+
+```{r emp_var_rate}
+ggplot(bankfull, aes(x=subscribed, y=emp_var_rate, fill=subscribed)) +
+  geom_boxplot() + geom_jitter(width=0.2) + 
+  xlab("subscribed")
+  ylab("employment variation rate")
+```
+
+
+## Machine Learning
+
+The data was partitioned into a training, validation, and test set.
+
+Two Machine Learning models were used to predict client subscription:
+
+- Logistic Regression
+
+- Random Forest
+
+Because the data set is overwhelmingly skewed towards clients not subscribing, 
+the statistical Kappa value helps determine which model will give us best 
+results.
+
+
+## Model Performance Evalution
+
+The Kappa value for the Random Forest model is higher than Logistic Regression 
+so the former will be the model of choice for the test data.
+
+Since there is a high volume of rejection, the accuracy of a prediction for 
+rejection is overwhelmingly high. Yet we are interested in 
+
+## Recommendations
+
+1. Reach out to subscribers from previous campaign as more than 50% of 
+  subscribers will re-subscribe.
+
+2. Contact clients via their cellular phone as they are more than twice as 
+  likely to subscribe compared to clients contacted via a regular telephone.
+
+3. Clients are more likely to subscribe when the country's Employment 
+  Variation Rate is -1.8. 
+

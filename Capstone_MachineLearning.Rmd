@@ -24,7 +24,6 @@ banking services.
 ```{r}
 bankfull_clean <- read_csv("bankfull_clean.csv", col_types = "ifffffffffiiiifdddddf")
 # "iccccccccciiiicdddddc"
-
 ```
 
 I will be treating this a supervised classification problem. While predicting 
@@ -43,6 +42,7 @@ set.seed(13456)
 TrainingValidationIndex <- createDataPartition(y=bankfull_clean$subscribed, p=0.80, list=FALSE)
 training_validation <- bankfull_clean[TrainingValidationIndex,]
 
+set.seed(13456)
 # Split the main 80% into a Training (75%) and Validation (25%) set
 trainIndex <- createDataPartition(training_validation$subscribed, p=0.75, list=FALSE)
 training <- training_validation[trainIndex,]
@@ -69,13 +69,12 @@ glm_model_full <- train(subscribed ~ . - duration_sec, data=training, method="gl
 What can we conclude from the logistic regression model? 
 
 ```{r}
-summary(glm_model_full) # results with entire variable set minus the duration of last call
+summary(glm_model_full) # results with entire variable set less the duration of last call
 ```
 
 Let's apply our model to the validation set.
 
 ```{r}
-set.seed(7)
 glm_predict_full <- predict(glm_model_full, newdata=validation)
 ```
 
@@ -96,7 +95,8 @@ caret::confusionMatrix(glm_predict_full, validation$subscribed, mode="everything
 **Comparing results of Logistic Regression model:**
 
 * Kappa = 0.2742
-* F1 = 0.32308
+* Kappa = 0.2976 (updated)
+
 
 ## Random Forest with CARET
 
@@ -114,8 +114,8 @@ summary(rf_model)
 
 Apply the Random Forest model to the Validation set.
 
-```{r}
-set.seed(7)
+```{r validationData}
+
 rf_prediction <- predict(rf_model, newdata=validation)
 ```
 
@@ -126,22 +126,17 @@ Review the Confusion Matrix for the Random Forest model.
 caret::confusionMatrix(rf_prediction, validation$subscribed, mode="everything", positive="yes")
 ```
 
-**Comparing results of Random Forest:**
+**Performance of Random Forest**
 
 10 FOLDS:
 
-* Kappa = 0.5145
-* F1 = 0.9481
-
-10 FOLDS (updated):
-
 * Kappa = 0.3182
-* F1 = 0.37143
 
-Because the Kappa value for the Random Forest model is higher than the Logistic Regression model, let's choose the Random Forest model for the final prediction with the test data.
+Because the Kappa value for the Random Forest model is higher than the Logistic 
+Regression model, let's choose the Random Forest model for the final prediction 
+with the test data.
 
-```{r}
-set.seed(7)
+```{r testData}
 predict_testData <- predict(rf_model, newdata=testData)
 caret::confusionMatrix(predict_testData, testData$subscribed, mode="everything", positive="yes")
 ```
@@ -149,8 +144,11 @@ caret::confusionMatrix(predict_testData, testData$subscribed, mode="everything",
 **Confirming against Test Data**
 
 * Kappa = 0.4039
-* F1 = 0.44928
 
 The Kappa score is higher with the test data than the training or validation 
 set. With the test data, the positive predictive value claims this model will 
 be correct 64.583% of the time and incorrect 35.417% of the time.
+
+`1 - Accurracy =`
+* Discuss Performance of Model
+* Discuss cost/benefit analysis of call sensitivity/specificity

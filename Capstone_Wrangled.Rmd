@@ -81,7 +81,7 @@ Let's start by reading in the dataset with values delimited by semi-colons along
 with designated column types as indicated by the data dictionary.
 
 ```{r Data_Prep}
-bankfull <- read_delim(file = "bank-additional.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
+bankfull <- read_delim(file = "bank-additional-full.csv", delim = ";", col_types = "iccccccccciiiicdddddc")
 
 bankfull$job <- as.factor(bankfull$job)
 bankfull$marital <- as.factor(bankfull$marital)
@@ -238,7 +238,8 @@ ggplot(bankfull, aes(x = loan, fill = subscribed)) +
 
 **Last Contact Data**
 
-Last contact data will include details about the last contact with the client. Variables includ type of contact, the day and month of contact, and the 
+Last contact data will include details about the last contact with the client. 
+Variables include type of contact, the day and month of contact, and the 
 duration of the last contact.
 
 Regarding last contact data, it appears customers are more inclined to 
@@ -247,8 +248,7 @@ subscribe when contacted via cellular compared to telephone.
 ```{r}
 ggplot(bankfull, aes(x=contact_typ, fill=subscribed)) + geom_bar()
 ctable(bankfull$contact_typ, bankfull$subscribed)
-ggplot(bankfull, aes(x=edu_lvl, fill=contact_typ)) + geom_bar(position="fill")
-ggplot(bankfull, aes(x=subscribed, y=euribor3m)) + geom_boxplot() +
+ggplot(bankfull, aes(x=subscribed, y=euribor3m, color=subscribed)) + geom_boxplot() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
@@ -273,8 +273,10 @@ Here is a cross-tabulation of the monthly subscriptions with explicit results:
 ctable(bankfull$month, bankfull$subscribed)
 ```
 
-The most subscriptions do occur in *May* and other summer months, *June, July, 
-and August* as confirmed by the frequency chart. Winter months *January* and 
+*March* may have the most percentage of successful subscriptions but the 
+number of client engagements is too low to be of significance. The most 
+subscriptions do occur in *May* and other summer months, *June, July, and 
+August* as confirmed by the frequency chart. Winter months *January* and 
 *February* are absent from the dataset.
 
 ```{r}
