@@ -1,7 +1,7 @@
 ---
-title: "Banking Capstone - Data Wrangling and Stastical Analysis"
+title: "Capstone Milestone"
 author: "Demetri Lee"
-date: "December 1, 2018"
+date: "4/16/2019"
 output: html_document
 ---
 
@@ -121,7 +121,6 @@ the dependent variable `y` to `subscribed`, which is more descriptive.
 
 ```{r}
 bankfull <- rename(bankfull, subscribed = y)
-#bankfull$subscribed <- factor(bankfull$subscribed, levels = c("yes", "no"))
 ```
 
 Replace all periods ('.') in values with underscores ('_') for legibility.
@@ -220,8 +219,6 @@ Further review of clients' financial records (credit in default, mortgage, or
 personal loan) also do not express any notable subscription trends.
 
 ```{r}
-#ggpairs(bankfull, columns=5:7)
-
 ggplot(bankfull, aes(x = cred_default, fill = subscribed)) + 
   geom_bar() + 
   labs(title = "Subscriptions relative to Clients who Default on Credit")
@@ -248,8 +245,7 @@ subscribe when contacted via cellular compared to telephone.
 ```{r}
 ggplot(bankfull, aes(x=contact_typ, fill=subscribed)) + geom_bar()
 ctable(bankfull$contact_typ, bankfull$subscribed)
-ggplot(bankfull, aes(x=subscribed, y=euribor3m, fill=subscribed)) + geom_boxplot() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 ```
 
 When looking at which month a client is most likely to subscribe, a regular 
@@ -317,48 +313,12 @@ ggplot(bankfull, aes(x=subscribed, y=duration_sec, fill=subscribed)) +
 
 ```
 
-There's a slight overlap in the Interquaritle Range of subscribers with the 
-non-subscribers. That is, there's a cut-off from the Q3 for non-subscribers 
-and Q1 of subscribers.
 
-```{r}
-subscribedYES <- filter(bankfull, subscribed=="yes") %>% select(duration_sec)
-descr(subscribedYES)
-
-subscribedNO <- filter(bankfull, subscribed=="no") %>% select(duration_sec)
-descr(subscribedNO)
-```
-
-
-The following charts affirms the chance of a susbscription occuring decreases 
-with each additional contact towards a customer.
-
-```{r}
-ggplot(bankfull, aes(x=contact_cnt, fill=subscribed)) + geom_bar(position="fill")
-maximum_contact_cnt <- max(bankfull %>% filter(subscribed=="yes") %>% 
-  select(contact_cnt))
-maximum_contact_cnt
-```
-
-As such, the bar graph indicates clients will not subscribe if contacted by 
-more than the maximum count value, `r maximum_contact_cnt`.
-
-
-The following density plot is for the number of days that passed from the previous campaign to the last day of contact. 
+The following density plot is for the number of days that passed from the 
+previous campaign to the last day of contact. 
 
 ```{r}
 ggplot(bankfull, aes(x=days_passed)) + geom_density() + facet_wrap(~subscribed)
-ctable(bankfull$days_passed, bankfull$subscribed)
-
-```
-
-Since we know a value of 999 means a client was not previously contacted, 
-filtering out `days_passed` = 999 should give better insight over days passed 
-for clients that were contacted.
-
-```{r}
-daysPassedMOD <- filter(bankfull, days_passed!=999)
-ggplot(daysPassedMOD, aes(x=subscribed, y=days_passed, fill=subscribed)) + geom_boxplot()
 
 ```
 
@@ -378,49 +338,3 @@ ggpairs(bankfull, columns=16:20, progress=FALSE)
 
 ```
 
-**What if I filter out the subscriptions?**
-
-Deep correlation between Employee Variation Rate and Euribor at 3 months but 
-doesn't seem like it affects client subscriptions.
-
-```{r correlation}
-ggplot(bankfull, aes(emp_var_rate, euribor3m)) + geom_point() + facet_wrap(~subscribed) + geom_smooth(method=lm)
-```
-
-Running a scatterplot for the Employment Variation Rate versus the 3 month 
-Euribor reiterates the correlation.
-
-```{r}
-ggplot(bankfull, aes(x=emp_var_rate, y=euribor3m)) + 
-  geom_point(aes(color = factor(subscribed)), alpha = 0.50, position="jitter") + 
-  labs(title = "Euribor (3 months) vs Employment Variation Rate (quarterly)")
-
-ggplot(bankfull, aes(x=cons_conf_idx, y=cons_price_idx)) + 
-  geom_point(aes(color=factor(subscribed), shape=factor(subscribed)), alpha=0.50, position="jitter") + 
-  labs(title = "Consumer Price Index vs Consumer Confidence Index")
-```
-
-Using box-plots used for the employment variable rate and the 3 month Euribor 
-rating with respect to subscriptions continue to look similar.
-
-```{r}
-ggplot(bankfull, aes(x=subscribed, y=emp_var_rate, fill=subscribed)) + geom_boxplot()
-ggplot(bankfull, aes(x=subscribed, y=euribor3m, fill=subscribed)) + geom_boxplot()
-```
-
-
-For this exploratory data analysis phase, here are a few conclusions:
-
-1. Reach out to subscribers from previous campaign as more than 50% of 
-  subscribers will re-subscribe.
-2. Contact clients via their mobile phone as the success rate is more than 
-  twice than clients contacted via a regular telephone.
-3. It is advised to close a subscription by the 11th contact because there is 
-  a strong chance of rejection.
-4. The length of the call should be more than 274 seconds or 4 min, 34 sec.
-
-_Write the revised dataset into a cleaned-up file._
-
-```{r conclusion}
-write_csv(bankfull, path="bankfull_clean.csv", col_names=TRUE)
-```

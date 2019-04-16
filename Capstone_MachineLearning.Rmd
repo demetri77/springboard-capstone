@@ -152,5 +152,6 @@ set. With the test data, the positive predictive value claims this model will
 be correct 64.583% of the time and incorrect 35.417% of the time.
 
 `1 - Accurracy =`
-* Discuss Performance of Model
-* Discuss cost/benefit analysis of call sensitivity/specificity
+
+- Discuss Performance of Model
+- Discuss cost/benefit analysis of call sensitivity/specificity
