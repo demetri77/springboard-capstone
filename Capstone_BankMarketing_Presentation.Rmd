@@ -118,9 +118,9 @@ The data was partitioned into a training, validation, and test set.
 
 Two Machine Learning models were used to predict client subscription:
 
-- Logistic Regression
+* Logistic Regression
 
-- Random Forest
+* Random Forest
 
 Because the data set is overwhelmingly skewed towards clients not subscribing, 
 the statistical Kappa value helps determine which model will give us the best 
